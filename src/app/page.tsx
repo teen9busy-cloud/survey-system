@@ -100,10 +100,16 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 하단 보안 및 개인정보 안내 */}
-        <div className="mt-12 text-center text-xs text-slate-400">
+        {/* 하단 푸터 & 관리자 링크 */}
+        <footer className="mt-16 pt-6 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
           <p>응답하신 모든 내용은 통계법 제33조에 의해 비밀이 보장되며, 통계 분석 및 사업 개선 목적으로만 활용됩니다.</p>
-        </div>
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition-colors"
+          >
+            🔒 관리자 대시보드
+          </Link>
+        </footer>
       </main>
     </div>
   );
