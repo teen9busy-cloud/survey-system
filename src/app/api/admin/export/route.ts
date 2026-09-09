@@ -27,98 +27,6 @@ const FACULTY_HEADERS = [
   "문13_특강 참여의향", "문13-1_미참여 이유", "문14_진로취업지원실에 바라는 점", "연락처"
 ];
 
-// DB 연결 전 데모/테스트용 샘플 데이터 생성기
-function getSampleData(type: 'student' | 'faculty') {
-  if (type === 'student') {
-    return [
-      {
-        id: "demo-s-1",
-        submitted_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-        phone: "010****1234",
-        gender: "여성",
-        college: "공과대학",
-        campus: "가좌",
-        admission_year: "2023년",
-        grade: "2학년",
-        raw_data: {
-          "타임스탬프": new Date(Date.now() - 1000 * 60 * 15).toLocaleString('ko-KR'),
-          "성별": "여성",
-          "소속_단과대학": "공과대학",
-          "캠퍼스": "가좌",
-          "입학년도": "2023년",
-          "학년": "2학년",
-          "문1_진로고민_시작시기": "1학년",
-          "문2_학과선택_이유": "취업이 잘되는 학과",
-          "문3_직업선택_기준": "성장 가능성",
-          "문4_지원부서_인지여부": "예",
-          "문4-1_알게된_경로": "홈페이지",
-          "문5_지원실_방문횟수": "1회",
-          "문6_프로그램_참여여부": "예",
-          "문7_취업역량시스템_활용여부": "있다",
-          "문8_졸업후_진로": "취업",
-          "문10_희망취업처": "대기업",
-          "문10-1_희망직무": "정보통신·IT",
-          "연락처": "010-1234-5678"
-        }
-      },
-      {
-        id: "demo-s-2",
-        submitted_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-        phone: "010****5678",
-        gender: "남성",
-        college: "경영대학",
-        campus: "가좌",
-        admission_year: "2022년",
-        grade: "3학년",
-        raw_data: {
-          "타임스탬프": new Date(Date.now() - 1000 * 60 * 45).toLocaleString('ko-KR'),
-          "성별": "남성",
-          "소속_단과대학": "경영대학",
-          "캠퍼스": "가좌",
-          "입학년도": "2022년",
-          "학년": "3학년",
-          "문1_진로고민_시작시기": "2학년",
-          "문2_학과선택_이유": "적성에 맞아서",
-          "문3_직업선택_기준": "급여 및 복리후생",
-          "문4_지원부서_인지여부": "예",
-          "문4-1_알게된_경로": "안내 문자",
-          "문5_지원실_방문횟수": "2회",
-          "문6_프로그램_참여여부": "예",
-          "문7_취업역량시스템_활용여부": "있다",
-          "문8_졸업후_진로": "공기업",
-          "문10_희망취업처": "공공기관/공기업",
-          "문10-1_희망직무": "금융·보험",
-          "연락처": "010-9876-5432"
-        }
-      }
-    ];
-  } else {
-    return [
-      {
-        id: "demo-f-1",
-        submitted_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-        phone: "010****3333",
-        gender: "남성",
-        college: "공과대학",
-        position: "교수",
-        raw_data: {
-          "타임스탬프": new Date(Date.now() - 1000 * 60 * 30).toLocaleString('ko-KR'),
-          "성별": "남성",
-          "소속 단과대학": "공과대학",
-          "직급": "교수",
-          "문1_지도 직무범위": "위의 모든 내용",
-          "문2_지도 중요사항": "전공 교육 및 전공 관련 직무 정보 제공",
-          "문3_지도 어려움 이유": "기존 업무로 인한 시간 부족",
-          "문4_정보 획득 경로": "본인의 지식과 경험",
-          "문5_필요한 지원": "진로·취업 지도에 대한 활동비, 인센티브 등 성과 지원",
-          "문13_특강 참여의향": "예",
-          "연락처": "010-3333-7777"
-        }
-      }
-    ];
-  }
-}
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action') || 'data';
@@ -134,24 +42,16 @@ export async function GET(request: NextRequest) {
   // 1. 통계 요약 (Overview) 요청 처리
   if (action === 'overview') {
     if (!process.env.DATABASE_URL) {
-      // DB 미연결 시 데모 통계 반환
+      // DB 미연결 시 0건 반환 (샘플 데이터 제거)
       return NextResponse.json({
         success: true,
-        isDemo: true,
         stats: {
-          totalCount: 3,
-          studentCount: 2,
-          facultyCount: 1,
-          todayCount: 3,
-          collegeStats: {
-            "공과대학": 2,
-            "경영대학": 1,
-          },
-          recentSubmissions: [
-            { type: "학생용", college: "공과대학", grade: "2학년", submitted_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), phone: "010****1234" },
-            { type: "교원용", college: "공과대학", grade: "교수", submitted_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), phone: "010****3333" },
-            { type: "학생용", college: "경영대학", grade: "3학년", submitted_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), phone: "010****5678" }
-          ]
+          totalCount: 0,
+          studentCount: 0,
+          facultyCount: 0,
+          todayCount: 0,
+          collegeStats: {},
+          recentSubmissions: []
         }
       });
     }
@@ -194,7 +94,6 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        isDemo: false,
         stats: {
           totalCount,
           studentCount,
@@ -205,26 +104,32 @@ export async function GET(request: NextRequest) {
         }
       });
     } catch (err: any) {
-      return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+      console.error('Overview DB 조회 에러 (테이블 미생성 등):', err);
+      return NextResponse.json({
+        success: true,
+        stats: {
+          totalCount: 0,
+          studentCount: 0,
+          facultyCount: 0,
+          todayCount: 0,
+          collegeStats: {},
+          recentSubmissions: []
+        }
+      });
     }
   }
 
   // 2. 응답 데이터 조회 및 CSV 다운로드 처리
   let rows: any[] = [];
-  let isDemo = false;
 
-  if (!process.env.DATABASE_URL) {
-    rows = getSampleData(type);
-    isDemo = true;
-  } else {
+  if (process.env.DATABASE_URL) {
     try {
       const sql = getDb();
       const table = type === 'faculty' ? 'faculty_survey_responses' : 'student_survey_responses';
       rows = await sql(`SELECT * FROM ${table} ORDER BY submitted_at DESC`);
     } catch (err: any) {
-      console.error(err);
-      rows = getSampleData(type);
-      isDemo = true;
+      console.error('상세 목록 DB 조회 에러:', err);
+      rows = [];
     }
   }
 
@@ -273,7 +178,6 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     success: true,
     type,
-    isDemo,
     totalCount: rows.length,
     data: rows,
   });
