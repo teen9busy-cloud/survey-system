@@ -1,0 +1,517 @@
+// ===============================================================
+// === 설문 구조 데이터 ===
+// ===============================================================
+/**
+ * index.html의 설문 구조를 반환합니다.
+ * 이 데이터는 숫자 응답을 텍스트로 변환하는 데 사용됩니다.
+ * @returns {object} 설문 구조 객체
+ */
+function getSurveyData() {
+  return {
+    parts: [
+      {
+        title: "Part 1. 공통사항",
+        questions: [
+          { name: "성별", options: ["남성", "여성"] },
+          { name: "소속 단과대학", options: ["인문대학", "사회과학대학", "자연과학대학", "경영대학", "공과대학", "농업생명과학대학", "법과대학", "사범대학", "수의과대학", "의과대학", "간호대학", "해양과학대학", "약학대학", "건설환경공과대학", "IT공과대학", "우주항공대학", "본부대학", "자율전공학부"] },
+          { name: "직급", options: ["교수", "부교수", "조교수", "강사"] }
+        ]
+      },
+      {
+        title: "Part II. 진로·취업 지도 인식 및 실태",
+        questions: [
+          { name: "문1_지도 직무범위", options: ["전공과 관련된 분야로 취업하려는 학생에 대한 진로·취업 지도", "전공과 상관없이 학과 학생의 진로·취업 전반에 대한 지도", "취업 관련 실습지도 및 취업처 발굴 등을 통한 취업 연계 역할", "대학원 진학 등 학문 분야로 진출하려는 학생의 진로 지도", "위의 모든 내용"] },
+          { name: "문2_지도 중요사항", options: ["전공 교육 및 전공 관련 직무 정보 제공", "전공과 상관없이 다양한 직무 및 취업 관련 정보 제공", "동아리, 공모전, 체험 등 비교과 활동 지도", "취업 눈높이 조정", "학생 생활·진로 상담 및 인성 교육"] },
+          { name: "문3_지도 어려움 이유", options: ["진로·취업 지도에 대한 전문성 부족", "진로·취업 지도에 필요한 정보 부족", "기존 업무로 인한 시간 부족", "진로·취업 지도에 대한 동기 부족", "학내 행정적·재정적 지원 부족", "대학 본부의 관심과 리더십 부족"] },
+          { name: "문4_정보 획득 경로", options: ["본인의 지식과 경험", "교내 취업 담당 부서 또는 진로·취업 지도 관련 자료(가이드북, 매뉴얼 등)", "전공 관련 지인 등 인맥", "인터넷 또는 관련 서적"] },
+          { name: "문5_필요한 지원", options: ["진로·취업 지도방법에 대한 자료 제공", "진로·취업 지도방법에 대한 학내 교육", "진로·취업 지도방법에 대한 외부 교육 참여 기회 제공", "진로·취업 컨설턴트와의 연계 상담 등 취업 부서의 지원", "진로·취업 지도에 대한 활동비, 인센티브 등 성과 지원"] },
+          { name: "문6_가이드북 희망주제", options: ["전공별·직종별 취업 가이드라인 및 취업처에 대한 실질적 홍보", "전공별 학생의 취업 성공 사례", "지역의 유망 취업 분야 안내 등 현실적인 정보 제공", "직무 관련 자격증 정보", "전공별 취업 실태 및 통계 데이터 제공", "현재와 미래 유망직업 트렌드 정보", "이력서 및 자기소개서 작성법"] },
+          { name: "문7_취업률 제고 우선영역", options: ["(학생 지원 강화) 학생 대상 진로탐색 및 취업역량 강화 프로그램 확대", "(학과/교원 지원 강화) 학과(전공) 중심의 진로·취업 지도 활동에 대한 지원 강화", "(대학 본부/인프라 강화) 대학 본부 주도의 취업 전략 수립 및 전문 인력 확충", "(기업·사회 연계 강화) 지역 우수 기업 및 유관기관과의 산학협력 및 채용 연계 강화"] },
+          { name: "문8_꿈미래개척 필요자료" },
+        ]
+      },
+      {
+        title: "Part III. 진로·취업 지도 특강 수요조사",
+        questions: [
+          { name: "문9_참여가능 교육시간", options: ["2시간 이하", "2~4시간", "6~8시간", "12시간(2일 과정)"] },
+          { name: "문10_참여 최적시기", options: ["1학기 기말고사 기간 중", "하계 방학 중", "2학기 중간고사 기간 중", "2학기 기말고사 기간 중", "동계 방학중"] },
+          { name: "문11_특강 희망내용", options: ["기업 및 채용 시장의 최근 동향 분석", "우수 취업 프로그램 및 취·창업 지도 성공 사례", "(1~2학년 대상) 진로 지도 기법", "(3~4학년 대상) 취업 지도 기법", "블라인드 채용 프로세스 이해"] },
+          { name: "문12_특강 운영방법", options: ["대면 교육(학내 강의장)", "대면 교육(학외 합숙 연수)", "비대면 교육(온라인)", "대면·비대면 교육 병행"] },
+          { name: "문13_특강 참여의향", options: ["예", "아니오"] },
+          { name: "문13-1_미참여 이유", options: ["특강 참여에 대한 동기 부족", "기존 업무로 인한 시간 부족", "특강의 실질적 유용성에 대한 의문"] },
+          { name: "문14_진로취업지원실에 바라는 점" }
+        ]
+      },
+      {
+        title: "감사 상품 발송 안내",
+        questions: [
+            { name: "연락처" }
+        ]
+      }
+    ]
+  };
+}
+
+/**
+ * 설문 데이터를 기반으로 질문 이름과 선택지 텍스트를 매핑하는 객체를 생성합니다.
+ * @returns {object} 질문 이름과 선택지 맵을 담은 객체
+ */
+let questionTextMap = null;
+function getQuestionTextMap() {
+    if (questionTextMap) {
+        return questionTextMap;
+    }
+    const surveyData = getSurveyData();
+    const map = {};
+    surveyData.parts.forEach(part => {
+        part.questions.forEach(q => {
+            if (q.options) {
+                map[q.name] = {};
+                q.options.forEach((opt, index) => {
+                    const code = index + 1;
+                    map[q.name][code.toString()] = opt;
+                });
+            }
+        });
+    });
+    questionTextMap = map;
+    return questionTextMap;
+}
+
+// ===============================================================
+// === 1단계: 이 함수를 가장 먼저 딱 한 번만 실행하세요! ===
+// ===============================================================
+/**
+ * 교원용 설문 응답을 기록할 Google Sheet를 생성하고 초기화합니다.
+ * 응답 시트와 대기열(Queue) 시트, 로그 시트를 모두 설정합니다.
+ */
+function setup() {
+  const ssName = '[교원용] 진로·취업 지원 의식조사 응답';
+  const ss = SpreadsheetApp.create(ssName);
+  
+  const responseSheet = ss.getActiveSheet();
+  responseSheet.setName("응답");
+
+  const headers = [
+    "타임스탬프", "성별", "소속 단과대학", "직급",
+    "문1_지도 직무범위", "문2_지도 중요사항",
+    "문3_지도 어려움 이유",
+    "문4_정보 획득 경로",
+    "문5_필요한 지원",
+    "문6_가이드북 희망주제",
+    "문7_취업률 제고 우선영역",
+    "문8_꿈미래개척 필요자료", 
+    "문9_참여가능 교육시간",
+    "문10_참여 최적시기",
+    "문11_특강 희망내용",
+    "문12_특강 운영방법",
+    "문13_특강 참여의향",
+    "문13-1_미참여 이유",
+    "문14_진로취업지원실에 바라는 점", 
+    "연락처"
+  ];
+  
+  responseSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  responseSheet.setFrozenRows(1);
+
+  const queueSheet = ss.insertSheet("대기열 (Queue)");
+  const queueHeaders = ["타임스탬프 (요청)", "응답 데이터 (JSON)"];
+  queueSheet.getRange(1, 1, 1, queueHeaders.length).setValues([queueHeaders]);
+  queueSheet.setFrozenRows(1);
+
+  // 오류 로그 시트 생성 (processForm 실패 시)
+  const logSheet1 = ss.insertSheet("대기열 오류 로그");
+  logSheet1.getRange(1, 1, 1, 4).setValues([["타임스탬프", "오류 유형", "에러 상세", "데이터 (JSON)"]]);
+
+  // 오류 로그 시트 생성 (processQueue 처리 실패 시)
+  const logSheet2 = ss.insertSheet("대기열 처리 오류");
+  logSheet2.getRange(1, 1, 1, 5).setValues([["타임스탬프", "오류 유형", "큐 시작 행", "큐 데이터 (JSON)", "에러 상세"]]);
+
+  // 모니터링 및 통계 시트 생성
+  const statsSheet = ss.insertSheet("운영 통계 로그");
+  statsSheet.getRange(1, 1, 1, 3).setValues([["타임스탬프", "처리된 행 수", "대기열 최종 행 수"]]);
+
+  PropertiesService.getScriptProperties().setProperty('spreadsheetId', ss.getId());
+  Logger.log(`✅ 응답 시트가 성공적으로 생성되었습니다. 구글 드라이브에서 '${ssName}' 파일을 확인하세요. URL: ${ss.getUrl()}`);
+}
+
+
+// ===============================================================
+// === 2단계: 웹 앱 배포 시 이 함수를 진입점(entry point)으로 사용 ===
+// ===============================================================
+function doGet(e) {
+  return HtmlService.createTemplateFromFile('index')
+      .evaluate()
+      .setTitle('[교원용] 진로·취업 지원 의식조사')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+
+// ===============================================================
+// === 3단계: 웹 앱 백엔드 - 응답을 즉시 대기열에 저장 (최적화 버전) ===
+// ===============================================================
+function processForm(formObject) {
+  try {
+    const sheetId = PropertiesService.getScriptProperties().getProperty('spreadsheetId');
+    if (!sheetId) {
+      Logger.log("오류: setup 함수가 실행되지 않아 sheetId를 찾을 수 없습니다.");
+      return { status: "error", message: "설문 시스템이 초기화되지 않았습니다. 관리자에게 문의하세요." };
+    }
+    
+    const ss = SpreadsheetApp.openById(sheetId);
+    let queueSheet = findActiveQueueSheet(ss);
+    if (!queueSheet) {
+        queueSheet = ss.getSheetByName("대기열 (Queue)"); // fall back to original name
+        if (!queueSheet) return { status: "error", message: "대기열 시트를 찾을 수 없습니다." };
+    }
+
+    const stringifiedData = JSON.stringify(formObject);
+    const rowData = [new Date(), stringifiedData];
+    
+    // safeAppendRow 함수를 사용하여 Sheets API 충돌 시 자동 재시도 (최대 6회)
+    const success = safeAppendRow(queueSheet, rowData, 6); 
+
+    if (success) {
+      return { status: "success" };
+    } else {
+      // 6회 재시도 후에도 최종 실패한 경우 (Google 부하가 극심한 경우)
+      return { status: "error", message: "서버 부하로 인해 요청 처리에 실패했습니다. 잠시 후 다시 시도해 주세요." };
+    }
+
+  } catch (error) {
+    Logger.log("!!! processForm에서 오류 발생: " + error.toString());
+    return { status: "error", message: "서버 오류 발생: " + error.message };
+  }
+}
+
+/**
+ * [UTILITY FUNCTION] 시트에 appendRow를 안전하게 시도하는 함수 (지수적 백오프 + 지터 + 실패 로그 포함)
+ */
+function safeAppendRow(sheet, data, maxRetries) {
+  const ss = sheet.getParent();
+  const logSheet = ss.getSheetByName("대기열 오류 로그"); // setup()에서 이미 생성됨
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      sheet.appendRow(data);
+      return true; // 성공하면 즉시 종료
+    } catch (err) {
+      // 마지막 시도이면 로그에 기록
+      if (i === maxRetries - 1) {
+        const errRow = [new Date(), "appendRow 실패", err.toString(), JSON.stringify(data)];
+        try { logSheet.appendRow(errRow); } catch(e) { Logger.log("로그 쓰기 실패: " + e); }
+        return false;
+      }
+      
+      // 지수적 백오프 (Exponential Backoff) + 지터 (Jitter)
+      const base = 200; // 기본 대기(ms)
+      const backoff = base * Math.pow(2, i); // 200, 400, 800, 1600...
+      const jitter = Math.floor(Math.random() * 200); // 0~199ms의 랜덤 대기 시간 추가
+      Utilities.sleep(backoff + jitter);
+    }
+  }
+  return false;
+}
+
+// ===============================================================
+// === 4단계: 대기열 처리 (트리거로 실행) - 운영 완성판 ===
+// ===============================================================
+const QUEUE_SHEET_MAX_ROWS = 1000; // 큐 시트 성능 저하를 막기 위한 최대 행 수
+const BATCH_LIMIT = 200; // 한 번에 처리할 행 수
+
+function processQueue() {
+  const lock = LockService.getScriptLock();
+  
+  // 큐 소비자가 동시에 실행되는 것을 방지하기 위해 락을 시도합니다. (최대 30초 대기)
+  try {
+    if (!lock.tryLock(30000)) {
+      Logger.log("processQueue: 다른 인스턴스가 실행 중입니다. (30초 대기 실패)");
+      return;
+    }
+
+    const sheetId = PropertiesService.getScriptProperties().getProperty('spreadsheetId');
+    if (!sheetId) return;
+    
+    const ss = SpreadsheetApp.openById(sheetId);
+    let queueSheet = findActiveQueueSheet(ss);
+    
+    if (!queueSheet) {
+        Logger.log('활성 대기열 시트를 찾을 수 없습니다.');
+        return;
+    }
+
+    const responseSheet = ss.getSheetByName("응답");
+    const errorLog = ss.getSheetByName("대기열 처리 오류");
+    const statsSheet = ss.getSheetByName("운영 통계 로그");
+    
+    const lastRow = queueSheet.getLastRow();
+    
+    // 1행은 헤더(제목) 행이라고 가정
+    if (lastRow <= 1) {
+        recordStats(statsSheet, 0, lastRow);
+        return;
+    }
+    
+    let processedCount = 0;
+    
+    const headers = responseSheet.getRange(1, 1, 1, responseSheet.getLastColumn()).getValues()[0];
+    const questionMap = getQuestionTextMap();
+
+    const finalRowToProcess = lastRow;
+
+    for (let start = 2; start <= finalRowToProcess; start += BATCH_LIMIT) {
+      const chunkSize = Math.min(BATCH_LIMIT, finalRowToProcess - start + 1);
+      
+      const queueData = queueSheet.getRange(start, 1, chunkSize, 2).getValues();
+
+      const rowsToAdd = [];
+      let currentQueueRowIndex = start;
+
+      // 1. 안전하게 각 행 파싱 및 매핑
+      for (let i = 0; i < queueData.length; i++) {
+        const row = queueData[i];
+        let formObject;
+        
+        try {
+          formObject = JSON.parse(row[1]);
+        } catch (err) {
+          errorLog.appendRow([new Date(), "JSON Parse 실패", currentQueueRowIndex, row[1], err.toString()]);
+          currentQueueRowIndex++;
+          continue;
+        }
+
+        const timestamp = row[0];
+        const mapped = headers.map(header => {
+          if (header === "타임스탬프") return timestamp;
+
+          const value = formObject[header];
+          if (value === undefined || value === null || value === "") return "";
+
+          // '기타' 필드 처리
+          if (questionMap[header] && value === '99') {
+            return formObject[header + '_기타'] || "";
+          } 
+          
+          // 일반 선택지/텍스트 매핑
+          if (questionMap[header] && questionMap[header][value]) {
+            return questionMap[header][value];
+          } 
+          
+          // 서술형, 연락처, 또는 기타 텍스트 필드
+          return formObject[header] || value || ""; 
+        });
+        
+        rowsToAdd.push(mapped);
+        currentQueueRowIndex++;
+      }
+
+      if (rowsToAdd.length > 0) {
+        // 2. 응답 시트에 배치 쓰기 (Batch Write)
+        responseSheet.getRange(responseSheet.getLastRow() + 1, 1, rowsToAdd.length, headers.length).setValues(rowsToAdd);
+      }
+      
+      // 3. 삭제: 청크만큼 안전하게 삭제 
+      try {
+        queueSheet.deleteRows(start, rowsToAdd.length); 
+      } catch (e) {
+        errorLog.appendRow([new Date(), "deleteRows 실패", start, rowsToAdd.length, e.toString()]);
+      }
+
+      processedCount += rowsToAdd.length;
+    }
+
+    // 4. 시트 용량 관리: 1000행 초과시 시트 자동 분할
+    checkAndRollQueueSheet(ss, queueSheet);
+
+    // 5. 통계 기록
+    recordStats(statsSheet, processedCount, queueSheet.getLastRow());
+
+  } catch (error) {
+    Logger.log("❌ Error in processQueue: " + error.toString());
+  } finally {
+    try { lock.releaseLock(); } catch(e) { /* lock was not acquired or already released */ }
+  }
+}
+
+/**
+ * [UTILITY FUNCTION] 활성 (가장 최신) 대기열 시트를 찾습니다.
+ */
+function findActiveQueueSheet(ss) {
+    const sheets = ss.getSheets();
+    const queueSheets = sheets.filter(s => s.getName().startsWith("대기열 (Queue)"));
+    
+    if (queueSheets.length === 0) return null;
+
+    // 인덱스를 기준으로 정렬하여 가장 최신 시트를 찾습니다.
+    queueSheets.sort((a, b) => {
+        const indexA = parseInt(a.getName().match(/\((\d+)\)/)?.[1] || 1);
+        const indexB = parseInt(b.getName().match(/\((\d+)\)/)?.[1] || 1);
+        
+        // ARCHIVE 시트는 가장 뒤로 보냅니다.
+        const isArchiveA = a.getName().includes("ARCHIVE");
+        const isArchiveB = b.getName().includes("ARCHIVE");
+
+        if (isArchiveA && !isArchiveB) return 1;
+        if (!isArchiveA && isArchiveB) return -1;
+        
+        return indexB - indexA; // 내림차순 정렬 (가장 큰 인덱스가 맨 위)
+    });
+    
+    return queueSheets[0];
+}
+
+/**
+ * [UTILITY FUNCTION] 대기열 시트 행 수가 초과되면 새로운 시트를 생성하고 큐를 롤오버합니다.
+ */
+function checkAndRollQueueSheet(ss, currentQueueSheet) {
+    if (currentQueueSheet.getLastRow() > QUEUE_SHEET_MAX_ROWS) {
+        let newIndex = 1;
+        
+        const currentName = currentQueueSheet.getName();
+        const match = currentName.match(/\((\d+)\)/);
+        
+        if (match) {
+            newIndex = parseInt(match[1]) + 1;
+            // 현재 시트를 ARCHIVE로 변경
+            currentQueueSheet.setName(`대기열 (Queue) - ${match[1]}-ARCHIVE-${new Date().getFullYear()}`);
+        } else {
+             // 최초 시트의 이름 변경
+             currentQueueSheet.setName(`대기열 (Queue) - 1-ARCHIVE-${new Date().getFullYear()}`);
+             newIndex = 2;
+        }
+
+        // 새로운 활성 Queue 시트 생성
+        const newQueueSheet = ss.insertSheet(`대기열 (Queue) (${newIndex})`);
+        const queueHeaders = ["타임스탬프 (요청)", "응답 데이터 (JSON)"];
+        newQueueSheet.getRange(1, 1, 1, queueHeaders.length).setValues([queueHeaders]);
+        newQueueSheet.setFrozenRows(1);
+        Logger.log(`✅ 대기열 시트가 ${QUEUE_SHEET_MAX_ROWS}행을 초과하여 새로운 시트 '대기열 (Queue) (${newIndex})'로 자동 분할되었습니다.`);
+    }
+}
+
+/**
+ * [UTILITY FUNCTION] 처리 결과를 통계 로그 시트에 기록합니다.
+ */
+function recordStats(sheet, processedCount, queueSize) {
+    if (sheet) sheet.appendRow([new Date(), processedCount, queueSize]);
+}
+
+/**
+ * [UTILITY FUNCTION] 대기열 오류 로그 시트에 기록된 실패 항목들을 재시도합니다.
+ * 이 함수는 별도의 트리거 (예: 1시간 주기)로 실행되도록 설정하는 것을 권장합니다.
+ */
+function retryFailedQueueWrites() {
+  const sheetId = PropertiesService.getScriptProperties().getProperty('spreadsheetId');
+  if (!sheetId) return;
+  const ss = SpreadsheetApp.openById(sheetId);
+  const errorLogSheet = ss.getSheetByName("대기열 오류 로그");
+  const queueSheet = findActiveQueueSheet(ss); // 현재 활성 큐 시트에 재기록 시도
+
+  if (!errorLogSheet || !queueSheet || errorLogSheet.getLastRow() <= 1) return;
+
+  const lastRow = errorLogSheet.getLastRow();
+  const range = errorLogSheet.getRange(2, 1, lastRow - 1, 4);
+  const failedData = range.getValues();
+  
+  const successfulRetries = [];
+  
+  // JSON 데이터만 추출하여 재시도 리스트 구성
+  for (let i = 0; i < failedData.length; i++) {
+    const row = failedData[i];
+    const dataString = row[3]; // 4번째 열(인덱스 3)에 JSON 문자열이 저장되어 있습니다.
+    
+    try {
+        const dataArray = [new Date(), dataString];
+        // 안전한 쓰기 함수를 사용하여 재시도. 성공 시 큐에 다시 들어갑니다.
+        const success = safeAppendRow(queueSheet, dataArray, 3); // 재시도 3회
+        
+        if (success) {
+            successfulRetries.push(i + 2); // 성공한 행 번호 (헤더 제외)
+        }
+    } catch (e) {
+        Logger.log(`Retry failed for row ${i + 2} (Critically): ${e}`);
+    }
+  }
+
+  // 성공적으로 재시도되어 큐에 재기록된 행 삭제
+  if (successfulRetries.length > 0) {
+    // 삭제는 역순으로 해야 안전함
+    successfulRetries.sort((a, b) => b - a);
+    successfulRetries.forEach(rowNum => {
+      errorLogSheet.deleteRow(rowNum);
+    });
+    Logger.log(`✅ ${successfulRetries.length}개의 실패 항목이 대기열에 재기록되었습니다.`);
+  }
+}
+
+
+[index]
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설문 종료</title>
+    <!-- Tailwind CSS CDN 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 'Inter' 폰트를 기본으로 사용하며, 한국어 폰트가 잘 보이도록 설정 */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #f0f4f8; /* 은은한 배경색 */
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-green': '#10b981', // 에메랄드 (성공 색상)
+                        'secondary-text': '#6b7280',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- 설문 종료 컨테이너 (카드 스타일) -->
+    <!-- max-w-xl 에서 max-w-2xl 로 변경하여 글자 줄바꿈이 생기지 않도록 공간 확보 -->
+    <div class="max-w-2xl w-full bg-white rounded-xl shadow-2xl p-8 sm:p-12 text-center transform transition duration-500 hover:shadow-3xl">
+
+        <!-- 성공 아이콘 (SVG 체크마크) -->
+        <div class="mb-6 flex justify-center">
+            <svg class="w-20 h-20 text-primary-green animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+
+        <!-- 메인 메시지 -->
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-4 leading-tight">
+            설문이 종료 되었습니다.
+        </h1>
+
+        <!-- 감사 메시지 -->
+        <p class="text-xl sm:text-2xl font-bold text-primary-green mb-8">
+            감사합니다!
+        </p>
+
+        <!-- 추가 안내 문구 -->
+        <!-- text-lg 에서 text-base 로 변경하여 줄바꿈 방지 -->
+        <p class="text-base text-secondary-text mb-10">
+            귀하의 소중한 의견은 저희 프로젝트와 서비스 개선에 큰 도움이 됩니다.
+        </p>
+
+        <!-- 다음 행동 유도 버튼 -->
+        <button onclick="window.close()"
+            class="w-full sm:w-auto px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out transform hover:scale-[1.02]">
+            창 닫기
+        </button>
+    </div>
+
+</body>
+</html>

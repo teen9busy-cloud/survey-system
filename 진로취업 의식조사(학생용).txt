@@ -1,0 +1,553 @@
+// =========================================================================
+// 1. 전역 상수 및 설정
+// =========================================================================
+
+const SHEET_NAME_RESPONSE = "응답"; // 최종 DB 시트 이름
+const SHEET_NAME_QUEUE = "대기열 (Queue)";   // 응답을 임시로 저장하는 큐 시트 이름
+const SHEET_NAME_ERROR = "대기열 처리 오류"; // 오류 로깅 시트 이름
+
+const CACHE_LOCK_TIMEOUT = 120; // Cache Lock 타임아웃 (초) - 폼 연타 방지
+const SCRIPT_LOCK_TIMEOUT = 300; // Script Lock 타임아웃 (초) - 큐 처리 Lock
+const BATCH_LIMIT = 50; // processQueue가 한 번에 처리할 최대 행 수
+const LOCK_TIMEOUT = 10000; // Lock 획득 대기 시간 10초로 단축 
+const RETRY_WAIT_TIME = 5000; // 5초 대기 후 재시도 시간
+
+// =========================================================================
+// 2. 설문 구조 및 유틸리티 함수 (변경 없음)
+// =========================================================================
+
+function getSurveyData() {
+// ... (getSurveyData 함수 내용 유지) ...
+  return {
+    parts: [
+      {
+        title: "Part 1. 진로에 대한 의식 및 준비도",
+        questions: [
+            { name: "문1_진로고민_시작시기", options: ["대학입학 전", "1학년", "2학년", "3학년", "4학년", "고민한 적 없다"]},
+            { name: "문2_학과선택_이유", options: ["성적에 맞춰서", "취업이 잘되는 학과", "진로교사 추천", "부모님 권유", "적성에 맞아서", "사회적 인지도"]},
+            { name: "문3_직업선택_기준", options: ["흥미와 적성", "급여 및 복리후생", "근무 환경", "사회적 인지도", "전공 관련도", "성장 가능성", "고용 안정성", "직장 소재지", "워라밸"]},
+            { name: "문4_지원부서_인지여부", options: ["예", "아니오"]},
+            { name: "문4-1_알게된_경로", options: ["홈페이지", "동기/선후배", "안내 문자", "현수막/배너", "전단지", "조교선생님", "수업 중 안내", "꿈미래개척", "학생지도"]},
+            { name: "문4-2_모르는_이유", options: ["홍보 부족", "안내 부족", "주변 정보 부재", "관심 없음"]},
+            { name: "문5_지원실_방문횟수", options: ["1회", "2회", "3회 이상", "방문한 적 없다"]},
+            { name: "문6_프로그램_참여여부", options: ["예", "아니오"]},
+            { name: "문6-1_미참여_이유", options: ["정보/기간을 놓쳐서", "희망 프로그램 부재", "필요성을 못 느껴서", "나중에 참여하려고", "다른 일정과 겹쳐서"]},
+            { name: "문7_취업역량시스템_활용여부", options: ["있다", "없다"]},
+            { name: "문7-1_만족한_기능", options: ["상담/프로그램 신청", "정장 및 공간(AI면접실)대여", "채용정보 제공", "제휴 사이트", "취업지원 정보", "졸업선배 멘토링", "취업 성공 후기", "진로탐색/로드맵", "잘 모르겠다"]},
+        ]
+      },
+      {
+        title: "Part 2. 취업에 대한 의식 및 준비도",
+        questions: [
+            { name: "문8_졸업후_진로", options: ["취업", "공무원", "창업", "대학원 진학", "(학사)편입", "유학/어학연수", "계획없음"]},
+            { name: "문8-1_계획없는_이유", options: ["적성/흥미를 몰라서", "정보 부족", "준비 방법 막막", "확신 부족", "특별한 이유 없음"]},
+            { name: "문9_취업준비_적정시기", options: ["1학년", "2학년", "3학년", "4학년", "졸업 이후"]},
+            { name: "문10_희망취업처", options: ["대기업", "중견·중소기업", "외국계기업", "해외취업", "공무원", "공공기관/공기업", "생각해본 적 없다"]},
+            { name: "문10-1_희망직무", options: ["경영·사무", "금융·보험", "교육·사회과학", "법률·공공", "보건·의료·복지", "문화·예술·방송", "영업·판매", "서비스", "건설·건축", "기계", "재료·화학·바이오", "전기·전자", "정보통신·IT", "식품가공", "환경·에너지", "농림어업", "연구·개발", "무역·유통", "조선·해양"]},
+            { name: "문11_희망근무지역", options: ["경상남도", "부산", "대구", "울산", "경상북도", "대전", "인천", "서울", "세종", "경기도", "광주", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "제주도", "해외"]},
+            { name: "문12_예상연봉", options: ["3000만원 미만", "3000~3500만원", "3500~4000만원", "4000~4500만원", "4500~5000만원", "5000~5500만원", "5500만원 이상"]},
+            { name: "문13_1_진로설정_노력", options: ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"]},
+            { name: "문13_2_정보탐색_방법인지", options: ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"]},
+            { name: "문13_3_지인과_대화", options: ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"]},
+            { name: "문13_4_온라인_자료탐색", options: ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"]},
+            { name: "문13_5_오프라인_자료탐색", options: ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"]},
+            { name: "문13_6_교내외_기관인지", options: ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"]},
+            { name: "문13_7_구체적_목표와_계획", options: ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"]},
+            { name: "문14_1_전공역량_함양", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문14_2_기업_이해", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문14_3_직무_이해", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문14_4_현장실습_경험", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문14_5_전공자격증", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문14_6_외국어능력", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문14_7_공모전경험", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문14_8_채용박람회_참여", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문14_9_일반직무역량", options: ["전혀 안 함", "별로 안 함", "보통", "열심히 하는 편", "매우 열심히 함"]},
+            { name: "문15_취득자격증", options: ["전공(기사)", "전공(산업기사)", "전공(기능사)", "컴활 1,2급", "한국사 1,2급", "준비할 예정", "없음"]},
+            { name: "문16_정보획득_경로", options: ["부모님/지인", "학과 교수님", "진로취업지원실", "SNS", "채용사이트", "오프라인 자료", "기업/기관", "채용박람회"]},
+            { name: "문17_가장_필요한_것", options: ["교과목 이수", "자격증 취득", "인턴 경험", "대외활동", "교내 비교과 참여", "자기 이해", "정보 탐색 능력", "취업 스킬", "공모전 수상", "어학 능력", "멘토"]},
+        ]
+      },
+      {
+        title: "Part 3. 프로그램 수요조사",
+        questions: [
+            { name: "문18_필요한_프로그램_분야", options: [
+                "진로·취업 개인 상담", "진로·취업 교과목", "진로·취업 정보 제공", "취업처 추천",
+                "채용설명회 및 박람회", "진로탐색·취업역량 강화", "직무자격 과정", "NCS 및 인적성 대비",
+                "해외 취업 지원", "학과 맞춤 프로그램"
+            ]},
+            { name: "문19_희망프로그램_서술형" },
+            { name: "문20-1_학기중_특강시간", options: ["1시간", "2시간", "3시간", "4시간 이상"]},
+            { name: "문20-1_방학중_특강시간", options: ["1시간", "2시간", "3시간", "4시간 이상"]},
+            { name: "문20-2_학기중_캠프일정", options: ["주중", "금/토", "토/일"]},
+            { name: "문20-2_방학중_캠프일정", options: ["주중", "금/토", "토/일"]},
+            { name: "문21_프로그램_선택요소", options: ["교육 내용", "운영 시간", "강사 인지도", "마일리지/장학금", "다양한 경험", "주변 추천"]},
+            { name: "문22_희망_외부사이트", options: ["잡플래닛", "코멘토", "위포트", "잡담", "마이다스아이티(AI면접)", "해커스"]},
+            { name: "문23_교과목_필수화_의견", options: ["전공필수", "교양필수", "교양선택", "불필요"]},
+        ]
+      },
+      {
+        title: "Part 4. 응답자 정보 (통계용)",
+        questions: [
+            { name: "성별", options: ["남성", "여성"]},
+            { name: "소속_단과대학", options: ["인문대학", "사회과학대학", "자연과학대학", "경영대학", "공과대학", "농업생명과학대학", "법과대학", "사범대학", "수의과대학", "의과대학", "간호대학", "해양과학대학", "약학대학", "건설환경공과대학", "IT공과대학", "우주항공대학", "본부대학", "자율전공학부"]},
+            { name: "캠퍼스", options: ["가좌", "칠암", "칠암(의·간호대)", "통영", "내동", "창원"]},
+            { name: "입학년도", options: ["2019년 이전", "2020년", "2021년", "2022년", "2023년", "2024년", "2025년"]},
+            { name: "학년", options: ["1학년", "2학년", "3학년", "4학년", "5학년", "6학년"]},
+            { name: "연락처" } // 연락처 필드 추가
+        ]
+      }
+    ]
+  };
+}
+
+let questionTextMap = null;
+function getQuestionTextMap() {
+    if (questionTextMap) return questionTextMap;
+    const surveyData = getSurveyData();
+    const map = {};
+    surveyData.parts.forEach(part => {
+        part.questions.forEach(q => {
+            if (q.options) {
+                map[q.name] = {};
+                q.options.forEach((opt, index) => {
+                    const cleanOpt = opt.replace(/<[^>]*>/g, ""); 
+                    map[q.name][(index + 1).toString()] = cleanOpt;
+                });
+            }
+        });
+    });
+    questionTextMap = map;
+    return map;
+}
+
+function setup() {
+  const ssName = '[학생용] 진로·취업 의식조사 응답';
+  const ss = SpreadsheetApp.create(ssName);
+  
+  // 응답 시트 (최종 DB)
+  const responseSheet = ss.getActiveSheet();
+  responseSheet.setName(SHEET_NAME_RESPONSE);
+  const headers = [
+    "타임스탬프", "UUID", "성별", "소속_단과대학", "캠퍼스", "입학년도", "학년", "문1_진로고민_시작시기", "문2_학과선택_이유", "문3_직업선택_기준", "문4_지원부서_인지여부", "문4-1_알게된_경로", "문4-2_모르는_이유", "문5_지원실_방문횟수", "문6_프로그램_참여여부", "문6-1_미참여_이유", "문7_취업역량시스템_활용여부", "문7-1_만족한_기능", "문8_졸업후_진로", "문8-1_계획없는_이유", "문9_취업준비_적정시기", "문10_희망취업처", "문10-1_희망직무", "문11_희망근무지역", "문12_예상연봉", "문13_1_진로설정_노력", "문13_2_정보탐색_방법인지", "문13_3_지인과_대화", "문13_4_온라인_자료탐색", "문13_5_오프라인_자료탐색", "문13_6_교내외_기관인지", "문13_7_구체적_목표와_계획", "문14_1_전공역량_함양", "문14_2_기업_이해", "문14_3_직무_이해", "문14_4_현장실습_경험", "문14_5_전공자격증", "문14_6_외국어능력", "문14_7_공모전경험", "문14_8_채용박람회_참여", "문14_9_일반직무역량", "문15_취득자격증", "문16_정보획득_경로", "문17_가장_필요한_것", "문18_필요한_프로그램_분야", "문19_희망프로그램_서술형", "문20-1_학기중_특강시간", "문20-1_방학중_특강시간", "문20-2_학기중_캠프일정", "문20-2_방학중_캠프일정", "문21_프로그램_선택요소", "문22_희망_외부사이트", "문23_교과목_필수화_의견", "연락처"
+  ];
+  responseSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  responseSheet.setFrozenRows(1);
+  
+  // 대기열 시트
+  const queueSheet = ss.insertSheet(SHEET_NAME_QUEUE);
+  const queueHeaders = ["타임스탬프 (요청)", "응답 데이터 (JSON)"];
+  queueSheet.getRange(1, 1, 1, queueHeaders.length).setValues([queueHeaders]);
+  queueSheet.setFrozenRows(1);
+  
+  // 로그 시트들
+  ss.insertSheet("대기열 오류 로그").getRange(1, 1, 1, 4).setValues([["타임스탬프", "오류 유형", "에러 상세", "데이터 (JSON)"]]);
+  ss.insertSheet("대기열 처리 오류").getRange(1, 1, 1, 5).setValues([["타임스탬프", "오류 유형", "큐 시작 행", "큐 데이터 (JSON)", "에러 상세"]]);
+  ss.insertSheet("운영 통계 로그").getRange(1, 1, 1, 3).setValues([["타임스탬프", "처리된 행 수", "대기열 최종 행 수"]]);
+  
+  PropertiesService.getScriptProperties().setProperty('spreadsheetId', ss.getId());
+  Logger.log(`✅ 응답 시트가 생성되었습니다: ${ss.getUrl()}`);
+}
+
+function doGet(e) {
+  return HtmlService.createTemplateFromFile('index')
+      .evaluate()
+      .setTitle('[학생용] 진로·취업 의식조사')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+
+// =========================================================================
+// 3. 폼 응답 핸들러 및 Queue 처리 함수
+// =========================================================================
+
+/**
+ * 폼 데이터를 처리하고 Queue에 저장합니다.
+ */
+function processForm(formObject) {
+  try {
+    const sheetId = PropertiesService.getScriptProperties().getProperty('spreadsheetId');
+    if (!sheetId) return { status: "error", message: "서버 오류: Spreadsheet ID가 설정되지 않았습니다." };
+
+    // 🔑 UUID 생성 및 삽입
+    formObject.uuid = Utilities.getUuid(); 
+    
+    const phone = cleanPhoneNumber(formObject['연락처']);
+    
+    if (!phone || !/^\d{10,11}$/.test(phone)) {
+        return { status: "error", message: '올바른 형식의 연락처를 입력해주세요. (예: 01012345678)' };
+    }
+
+    const ss = SpreadsheetApp.openById(sheetId);
+    const responseSheet = ss.getSheetByName(SHEET_NAME_RESPONSE);
+    const headers = getHeaders(responseSheet);
+    
+    // 1단계 방어: 제출 즉시 중복 확인 (Cache Lock)
+    const cache = CacheService.getScriptCache();
+    const cacheKeyPhone = 'phone_' + phone;
+    
+    if (cache.get(cacheKeyPhone)) {
+      return { status: "error", message: '이미 제출되었거나 처리 중입니다. 잠시 후 다시 시도해 주세요.' };
+    }
+    cache.put(cacheKeyPhone, 'submitted', CACHE_LOCK_TIMEOUT); // 2분간 임시 잠금
+
+    // 💡 2단계 방어 (강화): 최종 DB 중복 체크 - Queue 삽입 전에 Lock 걸고 강제 검사
+    const scriptLock = LockService.getScriptLock();
+    let isDuplicate = false;
+
+    // Lock 획득 시도 (Queue가 비어있는 상태에서 DB 조회 시 동시성 보장)
+    if (scriptLock.tryLock(LOCK_TIMEOUT)) {
+        try {
+            const { existingPhones } = getExistingPhonesAndUUIDs(responseSheet, headers);
+            
+            if (existingPhones.has(phone)) {
+                isDuplicate = true;
+            }
+        } catch (e) {
+            Logger.log("processForm DB 조회 중 오류 발생 (Lock 내부): " + e.toString());
+            // DB 조회 실패 시, 잠금 해제 후 바로 에러 반환하여 Queue 삽입 차단
+            scriptLock.releaseLock();
+            return { status: "error", message: "시스템 오류로 중복 응답 확인 실패. 잠시 후 다시 시도해주세요." };
+        } finally {
+            scriptLock.releaseLock();
+        }
+    } else {
+        // ❗ Lock 획득 실패 시, 중복 검사 자체가 불가능하므로 안전을 위해 Queue 삽입을 차단합니다.
+        Logger.log("processForm Lock 획득 실패: processQueue 실행 중. 안전을 위해 응답 차단.");
+        return { status: "error", message: "시스템 처리 중입니다. 잠시 후 다시 시도해주세요." };
+    }
+    
+    // 최종 중복 검사 결과 처리
+    if (isDuplicate) {
+        Logger.log(`processForm 단계에서 최종 DB 중복 응답 차단: ${phone}`);
+        return { status: "error", message: "이미 응답이 제출되었습니다." };
+    }
+
+
+    let queueSheet = ss.getSheetByName(SHEET_NAME_QUEUE);
+    if (!queueSheet) {
+        queueSheet = ss.insertSheet(SHEET_NAME_QUEUE);
+        queueSheet.appendRow(["타임스탬프 (요청)", "응답 데이터 (JSON)"]);
+    }
+    
+    // 큐에 데이터 삽입
+    safeAppendRow(queueSheet, [new Date(), JSON.stringify(formObject)], 5); 
+    
+    // 큐 삽입 성공 후 Cache Lock 해제 (processQueue에서 처리할 때 다시 Cache Lock을 사용할 것이므로 유지)
+    // Cache Lock은 processQueue가 해제하지 않으므로, 2분 뒤 자동으로 풀림.
+
+    return { status: "success" };
+
+  } catch (error) {
+    // 큐 삽입 실패 시 Cache 잠금 해제
+    if (formObject && formObject['연락처']) {
+        const phone = cleanPhoneNumber(formObject['연락처']);
+        const cache = CacheService.getScriptCache();
+        cache.remove('phone_' + phone); 
+    }
+    Logger.log("processForm 치명적 오류: " + error.toString());
+    return { status: "error", message: "서버 오류 발생: " + error.message };
+  }
+}
+
+
+/**
+ * 1분마다 실행되는 함수. 대기열을 처리하고 DB에 데이터를 추가합니다.
+ */
+function processQueue() {
+  const sheetId = PropertiesService.getScriptProperties().getProperty('spreadsheetId');
+  if (!sheetId) return;
+
+  const ss = SpreadsheetApp.openById(sheetId);
+  const queueSheet = ss.getSheetByName(SHEET_NAME_QUEUE);
+  const statsSheet = ss.getSheetByName("운영 통계 로그");
+
+  if (!queueSheet || queueSheet.getLastRow() <= 1) {
+      if(statsSheet) recordStats(statsSheet, 0, 0);
+      return;
+  }
+
+  const responseSheet = ss.getSheetByName(SHEET_NAME_RESPONSE);
+  const headers = getHeaders(responseSheet);
+  const questionMap = getQuestionTextMap();
+
+  const numRowsToProcess = Math.min(BATCH_LIMIT, queueSheet.getLastRow() - 1);
+  if (numRowsToProcess <= 0) return;
+
+  // 1. Lock 획득 (DB Read, DB Write, Queue Delete 전체를 묶음)
+  const scriptLock = LockService.getScriptLock();
+  
+  // 🔑 Lock 경합 보완: 5초 대기 후 재시도
+  if (!scriptLock.tryLock(LOCK_TIMEOUT)) {
+      Utilities.sleep(RETRY_WAIT_TIME); // 5초 대기
+      if (!scriptLock.tryLock(LOCK_TIMEOUT)) {
+        Logger.log("LOCK 실패 (재시도 후): processQueue가 잠금을 얻지 못했습니다.");
+        if(statsSheet) recordStats(statsSheet, 0, queueSheet.getLastRow() -1);
+        return; // 최종 실패
+      }
+      Logger.log("LOCK 성공 (5초 대기 후): 잠금 획득");
+  }
+
+  let queueData = null;
+  let result = { rowsToAdd: [], numProcessed: 0 };
+  let dbWriteSuccess = false; // DB 저장 성공 여부 플래그
+
+  try {
+    // 큐 데이터 읽기
+    queueData = queueSheet.getRange(2, 1, numRowsToProcess, 2).getValues();
+    
+    // 2. 큐 처리 및 중복 검사 (DB Read 포함)
+    result = checkExistingPhonesAndGetRows(ss, queueData, headers, questionMap);
+    
+    // 3. 응답 데이터 저장 (DB Write) 
+    if (result.rowsToAdd.length > 0) {
+        responseSheet.getRange(responseSheet.getLastRow() + 1, 1, result.rowsToAdd.length, headers.length).setValues(result.rowsToAdd);
+        dbWriteSuccess = true;
+    }
+    
+    // 5. 통계 기록 (Lock 해제 전)
+    if(statsSheet) recordStats(statsSheet, result.rowsToAdd.length, queueSheet.getLastRow() -1);
+
+  } catch (error) {
+    Logger.log("processQueue (Lock 내부) 치명적 오류: " + error.toString());
+    const errorLog = ss.getSheetByName(SHEET_NAME_ERROR);
+    safeAppendRow(errorLog, [new Date(), "processQueue 치명적 실패", "N/A", "N/A", error.toString()], 3);
+  } finally {
+    // 🔑 DB Write 성공 시에만 Queue 삭제 로직
+    try {
+        if (result.numProcessed > 0 && (dbWriteSuccess || result.rowsToAdd.length === 0)) {
+            // 저장 성공(dbWriteSuccess) 또는 모두 중복 처리(rowsToAdd=0)된 경우에만 삭제
+            queueSheet.deleteRows(2, result.numProcessed); 
+        } else if (!dbWriteSuccess && result.rowsToAdd.length > 0) {
+             // DB 저장이 실패했는데 rowsToAdd가 남아있는 경우: 데이터 유실 방지를 위해 Queue 삭제를 보류
+             Logger.log("응답 시트 저장 실패 (rowsToAdd > 0), Queue 삭제 보류: 다음 실행 시 재시도");
+        }
+    } catch (e) {
+        Logger.log("Queue 삭제 중 오류 발생: " + e.toString());
+    }
+    
+    scriptLock.releaseLock();
+  }
+}
+
+
+/**
+ * 응답 시트의 기존 전화번호를 조회하고, 큐 데이터를 처리 가능한 형태로 매핑합니다.
+ */
+function checkExistingPhonesAndGetRows(ss, queueData, headers, questionMap) {
+    const responseSheet = ss.getSheetByName(SHEET_NAME_RESPONSE);
+    
+    // 💡 새로운 함수를 사용하여 기존 데이터 조회 (중복 처리의 최종 방어선)
+    const { existingPhones, existingUUIDs } = getExistingPhonesAndUUIDs(responseSheet, headers);
+
+    const rowsToAdd = [];
+    const processedPhonesInBatch = new Set();
+    const errorLog = ss.getSheetByName("대기열 오류 로그");
+    let numProcessed = 0; 
+    
+    // 큐 데이터 처리
+    for (const row of queueData) {
+        numProcessed++;
+        let formObject;
+        
+        try {
+            formObject = JSON.parse(row[1]);
+            const currentPhone = cleanPhoneNumber(formObject['연락처']);
+            const currentUUID = formObject.uuid;
+
+            
+            // 3단계 방어: 최종 중복 검사
+            if (existingPhones.has(currentPhone)) {
+                Logger.log(`[비즈니스 중복] 응답 건너뛰기 (전화번호 중복): ${currentPhone}`);
+                continue; 
+            }
+            if (existingUUIDs.has(currentUUID)) { 
+                Logger.log(`[기술적 중복] 응답 건너뛰기 (UUID 중복): ${currentUUID}`);
+                continue; 
+            }
+            if (processedPhonesInBatch.has(currentPhone)) {
+                Logger.log(`[배치 내 중복] 응답 건너뛰기 (현재 배치 내 전화번호 중복): ${currentPhone}`);
+                continue; 
+            }
+
+            const mapped = headers.map(header => {
+                if (header === "타임스탬프") return row[0];
+                if (header === "UUID") return currentUUID; 
+                
+                const value = formObject[header];
+                if (value === undefined || value === null || value === "") return "";
+                if (Array.isArray(value)) {
+                    const questionMap = getQuestionTextMap();
+                    if (!questionMap[header]) return value.join(', ');
+                    return value.map(code => questionMap[header][code] || code).join(', ');
+                }
+                if (getQuestionTextMap()[header]) {
+                    if (value === '99') return formObject[header + '_기타'] || "";
+                    return getQuestionTextMap()[header][value] || value;
+                }
+                return value;
+            });
+
+            rowsToAdd.push(mapped);
+            
+            processedPhonesInBatch.add(currentPhone);
+            existingPhones.add(currentPhone);
+            existingUUIDs.add(currentUUID);
+
+        } catch (err) {
+            safeAppendRow(ss.getSheetByName("대기열 오류 로그"), [new Date(), "Row Processing 실패", "", row[1], err.toString()], 3);
+        }
+    }
+    
+    return { rowsToAdd: rowsToAdd, numProcessed: numProcessed }; 
+}
+
+
+// =========================================================================
+// 5. 유틸리티 함수
+// =========================================================================
+
+/**
+ * 응답 시트(DB)에서 기존 전화번호와 UUID를 모두 조회하여 Set으로 반환합니다.
+ */
+function getExistingPhonesAndUUIDs(responseSheet, headers) {
+    let existingPhones = new Set();
+    let existingUUIDs = new Set(); 
+    
+    if (!responseSheet || responseSheet.getLastRow() <= 1) {
+        return { existingPhones, existingUUIDs };
+    }
+    
+    const phoneColumnIndex = headers.indexOf('연락처') + 1; // 1-based index 
+    const uuidColumnIndex = headers.indexOf('UUID') + 1;     // 1-based index 
+    const rangeStartRow = 2;
+    const rangeNumRows = responseSheet.getLastRow() - 1;
+
+    // 1. 전화번호 열 전체를 읽기
+    if (phoneColumnIndex > 0) {
+        const phoneValues = responseSheet.getRange(rangeStartRow, phoneColumnIndex, rangeNumRows, 1).getValues();
+        existingPhones = new Set(phoneValues.flat().map(val => cleanPhoneNumber(val)));
+    }
+
+    // 2. UUID 열 전체를 읽기
+    if (uuidColumnIndex > 0) {
+        const uuidValues = responseSheet.getRange(rangeStartRow, uuidColumnIndex, rangeNumRows, 1).getValues();
+        existingUUIDs = new Set(uuidValues.flat());
+    }
+    
+    return { existingPhones, existingUUIDs };
+}
+
+
+/**
+ * 전화번호에서 하이픈, 공백, 괄호 등을 제거하고 숫자만 남깁니다.
+ */
+function cleanPhoneNumber(phone) {
+    if (typeof phone === 'number') {
+        phone = phone.toString();
+    }
+    if (typeof phone !== 'string') return '';
+    return phone.replace(/[^0-9]/g, '');
+}
+
+/**
+ * 시트의 헤더(첫 행)를 배열로 가져옵니다.
+ */
+function getHeaders(sheet) {
+    if (!sheet || sheet.getLastRow() < 1) return [];
+    return sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+}
+
+/**
+ * 오류 로그 시트에 안전하게 행을 추가합니다.
+ */
+function safeAppendRow(sheet, rowData, maxRetries) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      sheet.appendRow(rowData);
+      return;
+    } catch (err) {
+      if (i === maxRetries - 1) {
+        Logger.log(`최종 실패: safeAppendRow failed after ${maxRetries} retries.`);
+        throw err; // 최종 실패 시 에러 발생
+      }
+      Utilities.sleep(300 * Math.pow(2, i) + Math.floor(Math.random() * 200));
+    }
+  }
+}
+
+function recordStats(sheet, processedCount, queueSize) {
+    sheet.appendRow([new Date(), processedCount, Math.max(0, queueSize)]);
+}
+
+
+
+[index]
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설문 종료</title>
+    <!-- Tailwind CSS CDN 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 'Inter' 폰트를 기본으로 사용하며, 한국어 폰트가 잘 보이도록 설정 */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #f0f4f8; /* 은은한 배경색 */
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-green': '#10b981', // 에메랄드 (성공 색상)
+                        'secondary-text': '#6b7280',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- 설문 종료 컨테이너 (카드 스타일) -->
+    <!-- max-w-xl 에서 max-w-2xl 로 변경하여 글자 줄바꿈이 생기지 않도록 공간 확보 -->
+    <div class="max-w-2xl w-full bg-white rounded-xl shadow-2xl p-8 sm:p-12 text-center transform transition duration-500 hover:shadow-3xl">
+
+        <!-- 성공 아이콘 (SVG 체크마크) -->
+        <div class="mb-6 flex justify-center">
+            <svg class="w-20 h-20 text-primary-green animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+
+        <!-- 메인 메시지 -->
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-4 leading-tight">
+            설문이 종료 되었습니다.
+        </h1>
+
+        <!-- 감사 메시지 -->
+        <p class="text-xl sm:text-2xl font-bold text-primary-green mb-8">
+            감사합니다!
+        </p>
+
+        <!-- 추가 안내 문구 -->
+        <!-- text-lg 에서 text-base 로 변경하여 줄바꿈 방지 -->
+        <p class="text-base text-secondary-text mb-10">
+            귀하의 소중한 의견은 저희 프로젝트와 서비스 개선에 큰 도움이 됩니다.
+        </p>
+
+        <!-- 다음 행동 유도 버튼 -->
+        <button onclick="window.close()"
+            class="w-full sm:w-auto px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out transform hover:scale-[1.02]">
+            창 닫기
+        </button>
+    </div>
+
+</body>
+</html>
