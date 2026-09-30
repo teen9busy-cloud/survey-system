@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GraduationCap, BookOpen, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
+import { GraduationCap, BookOpen, ShieldCheck, CheckCircle2, ArrowRight, Eye, Sparkles } from 'lucide-react';
 import Header from '@/components/Header';
 
 export default function Home() {
@@ -52,13 +52,22 @@ export default function Home() {
               </ul>
             </div>
 
-            <Link
-              href="/student"
-              className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-200 group-hover:shadow-indigo-300"
-            >
-              학생용 설문 시작하기
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <div className="space-y-2.5">
+              <Link
+                href="/student"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-200 group-hover:shadow-indigo-300"
+              >
+                학생용 설문 시작하기
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="/student?preview=true"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium text-xs transition-colors"
+              >
+                <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                문항 미리보기 (응답 없이 전체 둘러보기)
+              </Link>
+            </div>
           </div>
 
           {/* 교원용 설문 카드 */}
@@ -90,25 +99,44 @@ export default function Home() {
               </ul>
             </div>
 
-            <Link
-              href="/faculty"
-              className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-all shadow-md shadow-emerald-200 group-hover:shadow-emerald-300"
-            >
-              교원용 설문 시작하기
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <div className="space-y-2.5">
+              <Link
+                href="/faculty"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-all shadow-md shadow-emerald-200 group-hover:shadow-emerald-300"
+              >
+                교원용 설문 시작하기
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="/faculty?preview=true"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium text-xs transition-colors"
+              >
+                <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                문항 미리보기 (응답 없이 전체 둘러보기)
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* 하단 푸터 & 관리자 링크 */}
-        <footer className="mt-16 pt-6 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-          <p>응답하신 모든 내용은 통계법 제33조에 의해 비밀이 보장되며, 통계 분석 및 사업 개선 목적으로만 활용됩니다.</p>
+        {/* 관계자/관리자 안내 배너 */}
+        <div className="max-w-3xl mx-auto mt-8 p-4 rounded-xl bg-indigo-50/60 border border-indigo-100 text-xs text-slate-600 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+            <span>
+              <strong>용역사 & 대학교 관계자 안내:</strong> &apos;문항 미리보기&apos;를 통해 필수 응답 없이 전 문항과 선택지를 빠르게 검토하실 수 있습니다.
+            </span>
+          </div>
           <Link
             href="/admin"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition-colors"
+            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-semibold transition-colors"
           >
-            🔒 관리자 대시보드
+            🔒 관리자 대시보드 바로가기
           </Link>
+        </div>
+
+        {/* 하단 푸터 */}
+        <footer className="mt-12 pt-6 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+          <p>응답하신 모든 내용은 통계법 제33조에 의해 비밀이 보장되며, 통계 분석 및 사업 개선 목적으로만 활용됩니다.</p>
         </footer>
       </main>
     </div>

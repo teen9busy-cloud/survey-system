@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import {
   Download,
@@ -15,7 +16,8 @@ import {
   FileSpreadsheet,
   Clock,
   Sparkles,
-  BarChart3
+  BarChart3,
+  Eye
 } from 'lucide-react';
 
 interface StatsOverview {
@@ -186,7 +188,27 @@ export default function AdminDashboardPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                <Link
+                  href="/student?preview=true"
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition-colors shadow-2xs"
+                  title="학생용 전체 설문 검토 (새 탭)"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  학생 설문 검토
+                </Link>
+
+                <Link
+                  href="/faculty?preview=true"
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold transition-colors shadow-2xs"
+                  title="교원용 전체 설문 검토 (새 탭)"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  교원 설문 검토
+                </Link>
+
                 <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer select-none bg-slate-100 px-3 py-2 rounded-xl">
                   <input
                     type="checkbox"

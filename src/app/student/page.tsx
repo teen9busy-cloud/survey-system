@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import ProgressBar from '@/components/ProgressBar';
 import LikertScale from '@/components/LikertScale';
 import { STUDENT_SURVEY, Question } from '@/lib/questions-student';
-import { AlertCircle, ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, Check, Loader2, Eye, ExternalLink } from 'lucide-react';
 
-export default function StudentSurveyPage() {
+function StudentSurveyContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPreview = searchParams.get('preview') === 'true';
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,7 +103,7 @@ export default function StudentSurveyPage() {
   };
 
   const handleNext = () => {
-    if (!validateStep()) {
+    if (!isPreview && !validateStep()) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -115,8 +118,21 @@ export default function StudentSurveyPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleStepJump = (step: number) => {
+    if (isPreview) {
+      setErrorMessage(null);
+      setCurrentStep(step);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isPreview) {
+      alert('검토/미리보기 모드에서는 설문이 제출되지 않습니다. (DB 보호)');
+      return;
+    }
+
     if (!validateStep()) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -151,12 +167,33 @@ export default function StudentSurveyPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
+      {/* 검토/미리보기 모드 안내 배너 */}
+      {isPreview && (
+        <aside aria-label="검토 모드 안내" className="bg-amber-500 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-md sticky top-0 z-50">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 shrink-0 text-amber-100" />
+              <span>[검토 / 미리보기 모드] 필수 입력 없이 자유롭게 모든 단계를 둘러보실 수 있습니다.</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="bg-amber-600/90 text-amber-50 px-2 py-0.5 rounded font-normal">
+                상단 Part 클릭 시 즉시 점프
+              </span>
+              <span className="bg-amber-700 text-amber-100 px-2 py-0.5 rounded font-bold">
+                DB 저장 차단됨
+              </span>
+            </div>
+          </div>
+        </aside>
+      )}
+
       <Header title="학생용 진로·취업 의식조사" badge="학생용" />
 
       <ProgressBar
         currentStep={currentStep}
         totalSteps={totalSteps}
         stepTitles={STUDENT_SURVEY.map((p) => p.title)}
+        onStepClick={isPreview ? handleStepJump : undefined}
       />
 
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 sm:py-10">
@@ -332,6 +369,15 @@ export default function StudentSurveyPage() {
                 다음 단계
                 <ArrowRight className="w-4 h-4" />
               </button>
+            ) : isPreview ? (
+              <button
+                type="button"
+                onClick={() => router.push('/')}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm transition-all shadow-md ml-auto"
+              >
+                <Eye className="w-4 h-4 text-amber-400" />
+                미리보기 완료 (홈으로 이동)
+              </button>
             ) : (
               <button
                 type="submit"
@@ -355,5 +401,19 @@ export default function StudentSurveyPage() {
         </form>
       </main>
     </div>
+  );
+}
+
+export default function StudentSurveyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+        </div>
+      }
+    >
+      <StudentSurveyContent />
+    </Suspense>
   );
 }
