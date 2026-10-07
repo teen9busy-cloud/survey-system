@@ -264,17 +264,17 @@ function StudentSurveyContent() {
             return (
               <div
                 key={q.id}
-                className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-sm transition-all"
+                className="bg-white rounded-2xl p-4 sm:p-7 border border-slate-200/90 shadow-xs transition-all"
               >
-                <div className="flex items-start justify-between gap-2 mb-4">
-                  <label className="block text-base sm:text-lg font-bold text-slate-800 leading-snug">
+                <div className="flex items-start justify-between gap-2 mb-3.5">
+                  <label className="block text-[16px] sm:text-lg font-bold text-slate-900 leading-snug">
                     {q.title}
-                    {q.required && <span className="text-red-500 ml-1">*</span>}
+                    {q.required && <span className="text-red-500 ml-1 font-bold">*</span>}
                   </label>
                 </div>
 
                 {q.description && (
-                  <p className="text-xs sm:text-sm text-slate-500 mb-4 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-500 mb-3.5 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                     {q.description}
                   </p>
                 )}
@@ -287,10 +287,10 @@ function StudentSurveyContent() {
                       return (
                         <label
                           key={option}
-                          className={`flex items-center gap-3 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none text-sm sm:text-base ${
+                          className={`flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none min-h-[48px] active:scale-[0.99] text-[15px] sm:text-base ${
                             isSelected
-                              ? 'bg-indigo-50/70 border-indigo-600 text-indigo-950 font-semibold shadow-xs'
-                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                              ? 'bg-indigo-50/90 border-indigo-600 text-indigo-950 font-semibold shadow-xs ring-1 ring-indigo-200'
+                              : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300'
                           }`}
                         >
                           <input
@@ -299,9 +299,9 @@ function StudentSurveyContent() {
                             value={option}
                             checked={isSelected}
                             onChange={() => handleInputChange(q.id, option)}
-                            className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                            className="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 shrink-0"
                           />
-                          <span className="flex-1">{option}</span>
+                          <span className="flex-1 leading-snug">{option}</span>
                         </label>
                       );
                     })}
@@ -312,10 +312,10 @@ function StudentSurveyContent() {
                 {q.type === 'checkbox' && q.options && (
                   <div className="space-y-2.5">
                     {q.maxSelect && (
-                      <div className="mb-2 flex items-center justify-between text-xs text-indigo-700 bg-indigo-50/60 px-3 py-1.5 rounded-lg border border-indigo-100">
-                        <span>최대 {q.maxSelect}개까지 선택 가능</span>
-                        <span className="font-semibold">
-                          선택됨: {Array.isArray(formData[q.id]) ? formData[q.id].length : 0} / {q.maxSelect}
+                      <div className="mb-2.5 flex items-center justify-between text-xs sm:text-sm text-indigo-800 bg-indigo-50/80 px-3.5 py-2 rounded-xl border border-indigo-200">
+                        <span className="font-medium">최대 {q.maxSelect}개까지 선택 가능</span>
+                        <span className="font-bold bg-white px-2 py-0.5 rounded-md border border-indigo-100 text-indigo-700">
+                          선택: {Array.isArray(formData[q.id]) ? formData[q.id].length : 0} / {q.maxSelect}
                         </span>
                       </div>
                     )}
@@ -325,19 +325,19 @@ function StudentSurveyContent() {
                       return (
                         <label
                           key={option}
-                          className={`flex items-center gap-3 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none text-sm sm:text-base ${
+                          className={`flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none min-h-[48px] active:scale-[0.99] text-[15px] sm:text-base ${
                             isSelected
-                              ? 'bg-indigo-50/70 border-indigo-600 text-indigo-950 font-semibold shadow-xs'
-                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                              ? 'bg-indigo-50/90 border-indigo-600 text-indigo-950 font-semibold shadow-xs ring-1 ring-indigo-200'
+                              : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300'
                           }`}
                         >
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleCheckboxChange(q, option)}
-                            className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                            className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 shrink-0"
                           />
-                          <span className="flex-1">{option}</span>
+                          <span className="flex-1 leading-snug">{option}</span>
                         </label>
                       );
                     })}
@@ -359,7 +359,7 @@ function StudentSurveyContent() {
                     <select
                       value={formData[q.id] || ''}
                       onChange={(e) => handleInputChange(q.id, e.target.value)}
-                      className="w-full p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all cursor-pointer"
+                      className="w-full min-h-[48px] p-3.5 sm:p-4 rounded-xl border border-slate-300 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all cursor-pointer shadow-xs"
                     >
                       <option value="">선택해 주세요</option>
                       {q.options.map((option) => (
@@ -381,28 +381,30 @@ function StudentSurveyContent() {
                   />
                 )}
 
-                {/* 6. Text input */}
+                {/* 6. Text input (모바일 숫자키패드 지원 및 16px 줌 방지) */}
                 {q.type === 'text' && (
                   <div>
                     <input
-                      type="text"
+                      type={q.id === '연락처' ? 'tel' : 'text'}
+                      inputMode={q.id === '연락처' ? 'numeric' : undefined}
+                      pattern={q.id === '연락처' ? '[0-9]*' : undefined}
                       value={formData[q.id] || ''}
                       onChange={(e) => handleInputChange(q.id, e.target.value)}
                       onBlur={q.id === '연락처' ? handlePhoneBlur : undefined}
-                      placeholder={q.id === '연락처' ? '01012345678' : '입력해 주세요'}
-                      className={`w-full p-3.5 sm:p-4 rounded-xl border text-sm sm:text-base focus:outline-none focus:ring-2 transition-all ${
+                      placeholder={q.id === '연락처' ? '01012345678 (숫자만 입력)' : '입력해 주세요'}
+                      className={`w-full min-h-[48px] p-3.5 sm:p-4 rounded-xl border text-base focus:outline-none focus:ring-2 transition-all shadow-xs ${
                         phoneDuplicateError
                           ? 'border-red-500 focus:ring-red-200'
-                          : 'border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-600'
+                          : 'border-slate-300 focus:ring-indigo-500/20 focus:border-indigo-600'
                       }`}
                     />
                     {phoneChecking && (
-                      <p className="text-xs text-indigo-600 mt-2 flex items-center gap-1">
-                        <Loader2 className="w-3 h-3 animate-spin" /> 중복 참여 여부 확인 중...
+                      <p className="text-xs text-indigo-600 mt-2 flex items-center gap-1 font-medium">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> 중복 참여 여부 확인 중...
                       </p>
                     )}
                     {phoneDuplicateError && (
-                      <p className="text-xs text-red-600 font-medium mt-2">
+                      <p className="text-xs text-red-600 font-semibold mt-2">
                         {phoneDuplicateError}
                       </p>
                     )}
@@ -416,23 +418,23 @@ function StudentSurveyContent() {
                     value={formData[q.id] || ''}
                     onChange={(e) => handleInputChange(q.id, e.target.value)}
                     placeholder="자유롭게 의견을 작성해 주세요 (선택사항)"
-                    className="w-full p-3.5 sm:p-4 rounded-xl border border-slate-200 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all resize-y"
+                    className="w-full p-3.5 sm:p-4 rounded-xl border border-slate-300 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all resize-y shadow-xs"
                   />
                 )}
               </div>
             );
           })}
 
-          {/* 하단 네비게이션 버튼 */}
-          <div className="flex items-center justify-between gap-4 pt-4 pb-12">
+          {/* 하단 네비게이션 버튼 (모바일 원핸드 터치 최적화) */}
+          <div className="flex items-center justify-between gap-3 pt-3 pb-12">
             {currentStep > 1 ? (
               <button
                 type="button"
                 onClick={handlePrev}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all shadow-xs"
+                className="inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-semibold text-base transition-all shadow-xs min-h-[48px]"
               >
                 <ArrowLeft className="w-4 h-4" />
-                이전 단계
+                이전
               </button>
             ) : (
               <div />
@@ -442,7 +444,7 @@ function StudentSurveyContent() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-sm hover:shadow"
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-base transition-all shadow-sm hover:shadow min-h-[48px]"
               >
                 다음 단계
                 <ArrowRight className="w-4 h-4" />
@@ -451,7 +453,7 @@ function StudentSurveyContent() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-base transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
               >
                 {isSubmitting ? (
                   <>

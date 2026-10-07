@@ -29,21 +29,26 @@ export default function RankingSelect({ options, value, onChange }: RankingSelec
 
   const ranks: { key: 'rank1' | 'rank2' | 'rank3'; label: string; badge: string; color: string }[] = [
     { key: 'rank1', label: '1순위 (가장 많이 활용)', badge: '1순위', color: 'bg-indigo-600 text-white' },
-    { key: 'rank2', label: '2순위 (두 번째로 활용)', badge: '2순위', color: 'bg-indigo-100 text-indigo-700' },
-    { key: 'rank3', label: '3순위 (세 번째로 활용)', badge: '3순위', color: 'bg-slate-100 text-slate-700' },
+    { key: 'rank2', label: '2순위 (두 번째로 활용)', badge: '2순위', color: 'bg-indigo-100 text-indigo-700 font-bold border border-indigo-200' },
+    { key: 'rank3', label: '3순위 (세 번째로 활용)', badge: '3순위', color: 'bg-slate-200 text-slate-700 font-bold border border-slate-300' },
   ];
 
   return (
-    <div className="space-y-3.5 pt-1">
+    <div className="space-y-3 pt-1">
       {ranks.map((r) => {
         const selectedVal = current[r.key] || '';
         return (
-          <div key={r.key} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 sm:p-4 rounded-xl border border-slate-200 bg-slate-50/60">
+          <div
+            key={r.key}
+            className={`flex flex-col sm:flex-row sm:items-center gap-2.5 p-3.5 sm:p-4 rounded-xl border transition-all ${
+              selectedVal ? 'bg-indigo-50/40 border-indigo-200' : 'bg-slate-50/70 border-slate-200'
+            }`}
+          >
             <div className="flex items-center gap-2 shrink-0 sm:w-48">
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${r.color}`}>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-md shadow-2xs ${r.color}`}>
                 {r.badge}
               </span>
-              <span className="text-xs sm:text-sm font-medium text-slate-700">
+              <span className="text-sm font-semibold text-slate-800">
                 {r.label}
               </span>
             </div>
@@ -51,7 +56,7 @@ export default function RankingSelect({ options, value, onChange }: RankingSelec
               <select
                 value={selectedVal}
                 onChange={(e) => handleRankChange(r.key, e.target.value)}
-                className="w-full p-2.5 sm:p-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all cursor-pointer"
+                className="w-full min-h-[46px] p-3 rounded-xl border border-slate-300 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all cursor-pointer shadow-2xs"
               >
                 <option value="">항목을 선택해 주세요</option>
                 {options.map((opt) => {
