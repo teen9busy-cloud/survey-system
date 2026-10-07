@@ -42,50 +42,24 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
-    // 2. DB 저장
+    // 2. DB 저장 (기본 컬럼 및 전체 JSONB 동시 저장)
+    const gender = responses['성별'] || null;
+    const college = responses['소속_단과대학'] || responses['소속 단과대학'] || null;
+    const position = responses['직급'] || null;
+
     const insertResult = await sql`
       INSERT INTO faculty_survey_responses (
         phone,
         gender,
         college,
         position,
-        q1_job_scope,
-        q2_important_points,
-        q3_difficulty_reasons,
-        q4_info_routes,
-        q5_needed_supports,
-        q6_guidebook_topics,
-        q7_priority_areas,
-        q8_dream_future_material,
-        q9_available_hours,
-        q10_optimal_timing,
-        q11_special_lecture_topics,
-        q12_operation_methods,
-        q13_participation_intent,
-        q13_1_non_participation_reason,
-        q14_wishes_for_center,
         responses,
         raw_data
       ) VALUES (
         ${phone},
-        ${responses['성별'] || null},
-        ${responses['소속_단과대학'] || responses['소속 단과대학'] || null},
-        ${responses['직급'] || null},
-        ${responses['문1_지도_직무범위'] || null},
-        ${responses['문2_지도_중요사항'] || null},
-        ${responses['문3_지도_어려움_이유'] || null},
-        ${responses['문4_정보_획득_경로'] || null},
-        ${responses['문5_필요한_지원'] || null},
-        ${responses['문6_가이드북_희망주제'] || null},
-        ${responses['문7_취업률_제고_우선영역'] || null},
-        ${responses['문8_꿈미래개척_필요자료'] || null},
-        ${responses['문9_참여가능_교육시간'] || null},
-        ${responses['문10_참여_최적시기'] || null},
-        ${responses['문11_특강_희망내용'] || null},
-        ${responses['문12_특강_운영방법'] || null},
-        ${responses['문13_특강_참여의향'] || null},
-        ${responses['문13-1_미참여_이유'] || null},
-        ${responses['문14_진로취업지원실에_바라는_점'] || null},
+        ${gender},
+        ${college},
+        ${position},
         ${JSON.stringify(responses)},
         ${JSON.stringify(raw_data || responses)}
       )

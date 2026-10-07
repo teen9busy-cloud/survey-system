@@ -31,6 +31,20 @@ function FacultySurveyContent() {
     }
   };
 
+  const handleCheckboxChange = (q: Question, option: string) => {
+    const currentList: string[] = Array.isArray(formData[q.id]) ? [...formData[q.id]] : [];
+    const index = currentList.indexOf(option);
+
+    if (index > -1) {
+      currentList.splice(index, 1);
+    } else {
+      currentList.push(option);
+    }
+
+    setFormData((prev) => ({ ...prev, [q.id]: currentList }));
+    setErrorMessage(null);
+  };
+
   const handlePhoneBlur = async () => {
     const rawPhone = formData['연락처'];
     if (!rawPhone) return;
@@ -63,7 +77,13 @@ function FacultySurveyContent() {
     for (const q of currentPart.questions) {
       if (!isQuestionVisible(q)) continue;
 
-      if (q.required) {
+      if (q.type === 'checkbox') {
+        const list = formData[q.id];
+        if (q.required && (!Array.isArray(list) || list.length === 0)) {
+          setErrorMessage(`"${q.title}" 문항을 최소 1개 이상 선택해 주세요.`);
+          return false;
+        }
+      } else if (q.required) {
         const val = formData[q.id];
         if (!val || (typeof val === 'string' && val.trim() === '')) {
           setErrorMessage(`"${q.title}" 문항을 선택하거나 입력해 주세요.`);
@@ -114,8 +134,9 @@ function FacultySurveyContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (isPreview) {
-      alert('검토/미리보기 모드에서는 설문이 제출되지 않습니다. (DB 보호)');
+      alert('현재 [검토 / 미리보기 모드]입니다. 실제 설문 제출 데이터는 DB에 저장되지 않습니다.');
       return;
     }
 
@@ -124,10 +145,10 @@ function FacultySurveyContent() {
       return;
     }
 
-    setIsSubmitting(true);
-    setErrorMessage(null);
-
     try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+
       const res = await fetch('/api/survey/faculty', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -155,17 +176,17 @@ function FacultySurveyContent() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       {/* 검토/미리보기 모드 안내 배너 */}
       {isPreview && (
-        <aside aria-label="검토 모드 안내" className="bg-amber-500 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-md sticky top-0 z-50">
+        <aside aria-label="검토 모드 안내" className="bg-emerald-600 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-md sticky top-0 z-50">
           <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 shrink-0 text-amber-100" />
+              <Eye className="w-4 h-4 shrink-0 text-emerald-100" />
               <span>[검토 / 미리보기 모드] 필수 입력 없이 자유롭게 모든 단계를 둘러보실 수 있습니다.</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
-              <span className="bg-amber-600/90 text-amber-50 px-2 py-0.5 rounded font-normal">
+              <span className="bg-emerald-700/90 text-emerald-50 px-2 py-0.5 rounded font-normal">
                 상단 Part 클릭 시 즉시 점프
               </span>
-              <span className="bg-amber-700 text-amber-100 px-2 py-0.5 rounded font-bold">
+              <span className="bg-emerald-800 text-emerald-100 px-2 py-0.5 rounded font-bold">
                 DB 저장 차단됨
               </span>
             </div>
@@ -173,7 +194,7 @@ function FacultySurveyContent() {
         </aside>
       )}
 
-      <Header title="교원용 진로·취업 지원 의식조사" badge="교원용" />
+      <Header title="교원용 진로·취업 지원 의식 및 수요 조사" badge="교원용" />
 
       <ProgressBar
         currentStep={currentStep}
@@ -229,6 +250,7 @@ function FacultySurveyContent() {
                   </p>
                 )}
 
+                {/* 1. Radio 단일 선택 */}
                 {q.type === 'radio' && q.options && (
                   <div className="space-y-2.5">
                     {q.options.map((option) => {
@@ -257,6 +279,35 @@ function FacultySurveyContent() {
                   </div>
                 )}
 
+                {/* 2. Checkbox 다중 선택 */}
+                {q.type === 'checkbox' && q.options && (
+                  <div className="space-y-2.5">
+                    {q.options.map((option) => {
+                      const list: string[] = Array.isArray(formData[q.id]) ? formData[q.id] : [];
+                      const isSelected = list.includes(option);
+                      return (
+                        <label
+                          key={option}
+                          className={`flex items-center gap-3 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none text-sm sm:text-base ${
+                            isSelected
+                              ? 'bg-emerald-50/70 border-emerald-600 text-emerald-950 font-semibold shadow-xs'
+                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleCheckboxChange(q, option)}
+                            className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                          />
+                          <span className="flex-1">{option}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* 3. Select 드롭다운 */}
                 {q.type === 'select' && q.options && (
                   <div className="relative">
                     <select
@@ -274,6 +325,7 @@ function FacultySurveyContent() {
                   </div>
                 )}
 
+                {/* 4. Text input */}
                 {q.type === 'text' && (
                   <div>
                     <input
@@ -301,12 +353,13 @@ function FacultySurveyContent() {
                   </div>
                 )}
 
+                {/* 5. Textarea */}
                 {q.type === 'textarea' && (
                   <textarea
                     rows={4}
                     value={formData[q.id] || ''}
                     onChange={(e) => handleInputChange(q.id, e.target.value)}
-                    placeholder="자유롭게 고견을 작성해 주세요 (선택사항)"
+                    placeholder="자유롭게 의견을 작성해 주세요 (선택사항)"
                     className="w-full p-3.5 sm:p-4 rounded-xl border border-slate-200 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all resize-y"
                   />
                 )}
@@ -332,35 +385,26 @@ function FacultySurveyContent() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-all shadow-md shadow-emerald-200 ml-auto"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-all shadow-sm hover:shadow"
               >
                 다음 단계
                 <ArrowRight className="w-4 h-4" />
-              </button>
-            ) : isPreview ? (
-              <button
-                type="button"
-                onClick={() => router.push('/')}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm transition-all shadow-md ml-auto"
-              >
-                <Eye className="w-4 h-4 text-amber-400" />
-                미리보기 완료 (홈으로 이동)
               </button>
             ) : (
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white font-semibold text-sm transition-all shadow-md shadow-emerald-200 ml-auto"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    제출 처리 중...
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    제출 중...
                   </>
                 ) : (
                   <>
-                    <Check className="w-4 h-4" />
-                    설문 최종 제출하기
+                    <Check className="w-5 h-5" />
+                    설문 제출하기
                   </>
                 )}
               </button>

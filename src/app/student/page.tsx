@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import ProgressBar from '@/components/ProgressBar';
 import LikertScale from '@/components/LikertScale';
+import RankingSelect from '@/components/RankingSelect';
 import { STUDENT_SURVEY, Question } from '@/lib/questions-student';
 import { AlertCircle, ArrowLeft, ArrowRight, Check, Loader2, Eye, ExternalLink } from 'lucide-react';
 
@@ -31,6 +32,25 @@ function StudentSurveyContent() {
     if (id === '연락처') {
       setPhoneDuplicateError(null);
     }
+  };
+
+  // 체크박스 다중 선택 핸들러
+  const handleCheckboxChange = (q: Question, option: string) => {
+    const currentList: string[] = Array.isArray(formData[q.id]) ? [...formData[q.id]] : [];
+    const index = currentList.indexOf(option);
+
+    if (index > -1) {
+      currentList.splice(index, 1);
+    } else {
+      if (q.maxSelect && currentList.length >= q.maxSelect) {
+        setErrorMessage(`최대 ${q.maxSelect}개까지만 선택할 수 있습니다.`);
+        return;
+      }
+      currentList.push(option);
+    }
+
+    setFormData((prev) => ({ ...prev, [q.id]: currentList }));
+    setErrorMessage(null);
   };
 
   // 전화번호 blur 시 실시간 중복 체크
@@ -76,6 +96,18 @@ function StudentSurveyContent() {
               return false;
             }
           }
+        }
+      } else if (q.type === 'ranking') {
+        const rankingVal = formData[q.id] || {};
+        if (!rankingVal.rank1 || !rankingVal.rank2 || !rankingVal.rank3) {
+          setErrorMessage(`"${q.title}" 문항의 1순위, 2순위, 3순위를 모두 선택해 주세요.`);
+          return false;
+        }
+      } else if (q.type === 'checkbox') {
+        const list = formData[q.id];
+        if (q.required && (!Array.isArray(list) || list.length === 0)) {
+          setErrorMessage(`"${q.title}" 문항을 최소 1개 이상 선택해 주세요.`);
+          return false;
         }
       } else if (q.required) {
         const val = formData[q.id];
@@ -128,8 +160,9 @@ function StudentSurveyContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (isPreview) {
-      alert('검토/미리보기 모드에서는 설문이 제출되지 않습니다. (DB 보호)');
+      alert('현재 [검토 / 미리보기 모드]입니다. 실제 설문 제출 데이터는 DB에 저장되지 않습니다.');
       return;
     }
 
@@ -138,10 +171,10 @@ function StudentSurveyContent() {
       return;
     }
 
-    setIsSubmitting(true);
-    setErrorMessage(null);
-
     try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+
       const res = await fetch('/api/survey/student', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -275,7 +308,52 @@ function StudentSurveyContent() {
                   </div>
                 )}
 
-                {/* 2. Select 드롭다운 */}
+                {/* 2. Checkbox 다중 선택 */}
+                {q.type === 'checkbox' && q.options && (
+                  <div className="space-y-2.5">
+                    {q.maxSelect && (
+                      <div className="mb-2 flex items-center justify-between text-xs text-indigo-700 bg-indigo-50/60 px-3 py-1.5 rounded-lg border border-indigo-100">
+                        <span>최대 {q.maxSelect}개까지 선택 가능</span>
+                        <span className="font-semibold">
+                          선택됨: {Array.isArray(formData[q.id]) ? formData[q.id].length : 0} / {q.maxSelect}
+                        </span>
+                      </div>
+                    )}
+                    {q.options.map((option) => {
+                      const list: string[] = Array.isArray(formData[q.id]) ? formData[q.id] : [];
+                      const isSelected = list.includes(option);
+                      return (
+                        <label
+                          key={option}
+                          className={`flex items-center gap-3 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none text-sm sm:text-base ${
+                            isSelected
+                              ? 'bg-indigo-50/70 border-indigo-600 text-indigo-950 font-semibold shadow-xs'
+                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleCheckboxChange(q, option)}
+                            className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                          />
+                          <span className="flex-1">{option}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* 3. Ranking 우선순위 선택 (1, 2, 3순위) */}
+                {q.type === 'ranking' && q.options && (
+                  <RankingSelect
+                    options={q.options}
+                    value={formData[q.id]}
+                    onChange={(val) => handleInputChange(q.id, val)}
+                  />
+                )}
+
+                {/* 4. Select 드롭다운 */}
                 {q.type === 'select' && q.options && (
                   <div className="relative">
                     <select
@@ -293,7 +371,7 @@ function StudentSurveyContent() {
                   </div>
                 )}
 
-                {/* 3. Likert 5점 척도 */}
+                {/* 5. Likert 5점 척도 */}
                 {q.type === 'likert' && q.options && q.likertItems && (
                   <LikertScale
                     options={q.options}
@@ -303,7 +381,7 @@ function StudentSurveyContent() {
                   />
                 )}
 
-                {/* 4. Text input */}
+                {/* 6. Text input */}
                 {q.type === 'text' && (
                   <div>
                     <input
@@ -331,7 +409,7 @@ function StudentSurveyContent() {
                   </div>
                 )}
 
-                {/* 5. Textarea */}
+                {/* 7. Textarea */}
                 {q.type === 'textarea' && (
                   <textarea
                     rows={4}
@@ -364,35 +442,26 @@ function StudentSurveyContent() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-200 ml-auto"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-sm hover:shadow"
               >
                 다음 단계
                 <ArrowRight className="w-4 h-4" />
-              </button>
-            ) : isPreview ? (
-              <button
-                type="button"
-                onClick={() => router.push('/')}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm transition-all shadow-md ml-auto"
-              >
-                <Eye className="w-4 h-4 text-amber-400" />
-                미리보기 완료 (홈으로 이동)
               </button>
             ) : (
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white font-semibold text-sm transition-all shadow-md shadow-emerald-200 ml-auto"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    제출 처리 중...
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    제출 중...
                   </>
                 ) : (
                   <>
-                    <Check className="w-4 h-4" />
-                    설문 최종 제출하기
+                    <Check className="w-5 h-5" />
+                    설문 제출하기
                   </>
                 )}
               </button>
