@@ -38,15 +38,32 @@ const FACULTY_HEADERS = [
   "문13_특강_희망내용", "문14_특강_참여의향", "문14-1_미참여_이유", "문15_바라는점"
 ];
 
-function formatFieldValue(val: any): string {
+function formatFieldValue(val: any, etcVal?: string): string {
   if (val === null || val === undefined) return '';
-  if (Array.isArray(val)) return val.join('; ');
+  if (Array.isArray(val)) {
+    return val
+      .map((item) => {
+        if ((item === '기타' || (typeof item === 'string' && item.startsWith('기타'))) && etcVal) {
+          return `기타(${etcVal})`;
+        }
+        return item;
+      })
+      .join('; ');
+  }
   if (typeof val === 'object') {
     return Object.entries(val)
       .map(([k, v]) => `${k}: ${v}`)
       .join(', ');
   }
-  return String(val);
+  const str = String(val);
+  if ((str === '기타' || str.startsWith('기타')) && etcVal) {
+    return `기타(${etcVal})`;
+  }
+  return str;
+}
+
+function getFieldWithEtc(d: any, key: string): string {
+  return formatFieldValue(d[key], d[`${key}_기타`]);
 }
 
 function extractStudentRow(r: any): string[] {
@@ -62,31 +79,31 @@ function extractStudentRow(r: any): string[] {
     d['캠퍼스'] || r.campus || '',
     d['입학년도'] || r.admission_year || '',
     d['학년'] || r.grade || '',
-    d['문1_진로고민_시작시기'] || '',
-    d['문2_학과선택_이유'] || '',
-    d['문3_직업선택_기준'] || '',
-    d['문4_지원부서_인지여부'] || '',
-    d['문4-1_알게된_경로'] || '',
-    d['문4-2_모르는_이유'] || '',
-    d['문5_방문경험'] || '',
-    d['문5-1_방문횟수'] || '',
-    d['문6_프로그램_참여여부'] || '',
-    d['문6-1_미참여_이유'] || '',
-    d['문7_학생역량시스템_활용여부'] || '',
+    getFieldWithEtc(d, '문1_진로고민_시작시기'),
+    getFieldWithEtc(d, '문2_학과선택_이유'),
+    getFieldWithEtc(d, '문3_직업선택_기준'),
+    getFieldWithEtc(d, '문4_지원부서_인지여부'),
+    getFieldWithEtc(d, '문4-1_알게된_경로'),
+    getFieldWithEtc(d, '문4-2_모르는_이유'),
+    getFieldWithEtc(d, '문5_방문경험'),
+    getFieldWithEtc(d, '문5-1_방문횟수'),
+    getFieldWithEtc(d, '문6_프로그램_참여여부'),
+    getFieldWithEtc(d, '문6-1_미참여_이유'),
+    getFieldWithEtc(d, '문7_학생역량시스템_활용여부'),
     rankVal.rank1 || '',
     rankVal.rank2 || '',
     rankVal.rank3 || '',
-    d['문8_더자람제도_인지여부'] || '',
-    d['문8-1_더자람_인지경로'] || '',
-    d['문8-2_더자람_도움기대도'] || '',
-    d['문8-3_더자람_미인지이유'] || '',
-    d['문9_졸업후_진로'] || '',
-    d['문9-1_계획없는_이유'] || '',
-    d['문10_취업준비_적정시기'] || '',
-    d['문11_희망취업처'] || '',
-    d['문11-1_희망직무'] || '',
-    d['문12_희망근무지역'] || '',
-    d['문13_희망연봉'] || '',
+    getFieldWithEtc(d, '문8_더자람제도_인지여부'),
+    getFieldWithEtc(d, '문8-1_더자람_인지경로'),
+    getFieldWithEtc(d, '문8-2_더자람_도움기대도'),
+    getFieldWithEtc(d, '문8-3_더자람_미인지이유'),
+    getFieldWithEtc(d, '문9_졸업후_진로'),
+    getFieldWithEtc(d, '문9-1_계획없는_이유'),
+    getFieldWithEtc(d, '문10_취업준비_적정시기'),
+    getFieldWithEtc(d, '문11_희망취업처'),
+    getFieldWithEtc(d, '문11-1_희망직무'),
+    getFieldWithEtc(d, '문12_희망근무지역'),
+    getFieldWithEtc(d, '문13_희망연봉'),
     d['문14_1_진로설정_적극노력'] || '',
     d['문14_2_정보탐색_스스로'] || '',
     d['문14_3_지인과_진로대화'] || '',
@@ -96,9 +113,9 @@ function extractStudentRow(r: any): string[] {
     d['문15_3_취업역량_개발'] || '',
     d['문15_4_직무경험'] || '',
     d['문15_5_상담프로그램_참여'] || '',
-    formatFieldValue(d['문16_취득자격증']),
-    d['문17_정보획득_경로'] || '',
-    d['문18_가장_필요한것'] || '',
+    getFieldWithEtc(d, '문16_취득자격증'),
+    getFieldWithEtc(d, '문17_정보획득_경로'),
+    getFieldWithEtc(d, '문18_가장_필요한것'),
     // 10개 프로그램군 5점 척도 필요도 평가
     d['문19_필요도_개일상담'] || '',
     d['문19_필요도_교과목'] || '',
@@ -113,13 +130,13 @@ function extractStudentRow(r: any): string[] {
     // Top 3 선택
     formatFieldValue(d['문19_2_최우선_프로그램_Top3']),
     d['문20_희망프로그램_의견'] || '',
-    d['문21_1_학기중_특강시간'] || '',
-    d['문21_1_방학중_특강시간'] || '',
-    d['문21_2_학기중_캠프일정'] || '',
-    d['문21_2_방학중_캠프일정'] || '',
-    d['문22_비교과_선택요소'] || '',
-    d['문23_희망_외부포털'] || '',
-    d['문24_교과목_필수화_의견'] || '',
+    getFieldWithEtc(d, '문21_1_학기중_특강시간'),
+    getFieldWithEtc(d, '문21_1_방학중_특강시간'),
+    getFieldWithEtc(d, '문21_2_학기중_캠프일정'),
+    getFieldWithEtc(d, '문21_2_방학중_캠프일정'),
+    getFieldWithEtc(d, '문22_비교과_선택요소'),
+    getFieldWithEtc(d, '문23_희망_외부포털'),
+    getFieldWithEtc(d, '문24_교과목_필수화_의견'),
   ];
 }
 
@@ -134,25 +151,25 @@ function extractFacultyRow(r: any): string[] {
     d['소속_단과대학'] || r.college || '',
     d['캠퍼스'] || '',
     d['직급'] || r.position || '',
-    d['문1_지도_직무범위'] || '',
-    d['문2_지도_중요사항'] || '',
-    formatFieldValue(d['문3_지도_어려움_이유']),
-    formatFieldValue(d['문4_정보_획득_경로']),
-    d['문5_필요한_지원'] || '',
-    formatFieldValue(d['문6_가이드북_희망주제']),
-    d['문7_취업률제고_우선영역'] || '',
-    d['문8_더자람제도_인지여부'] || '',
-    d['문8-1_더자람_인지경로'] || '',
-    d['문8-2_더자람_도움기대도'] || '',
-    d['문8-3_더자람_정착필요사항'] || '',
-    d['문8-4_더자람_미인지이유'] || '',
+    getFieldWithEtc(d, '문1_지도_직무범위'),
+    getFieldWithEtc(d, '문2_지도_중요사항'),
+    getFieldWithEtc(d, '문3_지도_어려움_이유'),
+    getFieldWithEtc(d, '문4_정보_획득_경로'),
+    getFieldWithEtc(d, '문5_필요한_지원'),
+    getFieldWithEtc(d, '문6_가이드북_희망주제'),
+    getFieldWithEtc(d, '문7_취업률제고_우선영역'),
+    getFieldWithEtc(d, '문8_더자람제도_인지여부'),
+    getFieldWithEtc(d, '문8-1_더자람_인지경로'),
+    getFieldWithEtc(d, '문8-2_더자람_도움기대도'),
+    getFieldWithEtc(d, '문8-3_더자람_정착필요사항'),
+    getFieldWithEtc(d, '문8-4_더자람_미인지이유'),
     d['문9_꿈미래개척_희망자료'] || '',
-    d['문10_특강_운영방법'] || '',
-    d['문11_참여가능_교육시간'] || '',
-    d['문12_참여_최적시기'] || '',
-    formatFieldValue(d['문13_특강_희망내용']),
-    d['문14_특강_참여의향'] || '',
-    d['문14-1_미참여_이유'] || '',
+    getFieldWithEtc(d, '문10_특강_운영방법'),
+    getFieldWithEtc(d, '문11_참여가능_교육시간'),
+    getFieldWithEtc(d, '문12_참여_최적시기'),
+    getFieldWithEtc(d, '문13_특강_희망내용'),
+    getFieldWithEtc(d, '문14_특강_참여의향'),
+    getFieldWithEtc(d, '문14-1_미참여_이유'),
     d['문15_바라는점'] || '',
   ];
 }

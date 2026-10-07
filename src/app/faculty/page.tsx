@@ -237,15 +237,15 @@ function FacultySurveyContent() {
                 key={q.id}
                 className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-sm transition-all"
               >
-                <div className="flex items-start justify-between gap-2 mb-4">
-                  <label className="block text-base sm:text-lg font-bold text-slate-800 leading-snug">
+                <div className="flex items-start justify-between gap-2 mb-3.5">
+                  <label className="block text-[17px] sm:text-xl font-bold text-slate-900 leading-snug">
                     {q.title}
-                    {q.required && <span className="text-red-500 ml-1">*</span>}
+                    {q.required && <span className="text-red-500 ml-1 font-bold">*</span>}
                   </label>
                 </div>
 
                 {q.description && (
-                  <p className="text-xs sm:text-sm text-slate-500 mb-4 leading-relaxed">
+                  <p className="text-xs sm:text-[13px] text-slate-600 mb-3.5 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                     {q.description}
                   </p>
                 )}
@@ -255,25 +255,42 @@ function FacultySurveyContent() {
                   <div className="space-y-2.5">
                     {q.options.map((option) => {
                       const isSelected = formData[q.id] === option;
+                      const isEtcOption = option === '기타' || option.startsWith('기타');
+
                       return (
-                        <label
-                          key={option}
-                          className={`flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none min-h-[48px] active:scale-[0.99] text-[15px] sm:text-base ${
-                            isSelected
-                              ? 'bg-emerald-50/90 border-emerald-600 text-emerald-950 font-semibold shadow-xs ring-1 ring-emerald-200'
-                              : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name={q.id}
-                            value={option}
-                            checked={isSelected}
-                            onChange={() => handleInputChange(q.id, option)}
-                            className="w-5 h-5 text-emerald-600 focus:ring-emerald-500 border-slate-300 shrink-0"
-                          />
-                          <span className="flex-1 leading-snug">{option}</span>
-                        </label>
+                        <div key={option} className="flex flex-col">
+                          <label
+                            className={`flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none min-h-[50px] active:scale-[0.99] text-[16px] sm:text-[17px] ${
+                              isSelected
+                                ? 'bg-emerald-50/90 border-emerald-600 text-emerald-950 font-semibold shadow-xs ring-1 ring-emerald-200'
+                                : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={q.id}
+                              value={option}
+                              checked={isSelected}
+                              onChange={() => handleInputChange(q.id, option)}
+                              className="w-5 h-5 text-emerald-600 focus:ring-emerald-500 border-slate-300 shrink-0"
+                            />
+                            <span className="flex-1 leading-snug">{option}</span>
+                          </label>
+
+                          {/* 기타 선택 시 구체적인 내용 입력창 */}
+                          {isEtcOption && isSelected && (
+                            <div className="mt-2 ml-2 pl-3 sm:pl-4 border-l-2 border-emerald-500 animate-fadeIn">
+                              <input
+                                type="text"
+                                value={formData[`${q.id}_기타`] || ''}
+                                onChange={(e) => handleInputChange(`${q.id}_기타`, e.target.value)}
+                                placeholder="기타 내용을 구체적으로 입력해 주세요"
+                                className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs"
+                                autoFocus
+                              />
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
@@ -285,23 +302,40 @@ function FacultySurveyContent() {
                     {q.options.map((option) => {
                       const list: string[] = Array.isArray(formData[q.id]) ? formData[q.id] : [];
                       const isSelected = list.includes(option);
+                      const isEtcOption = option === '기타' || option.startsWith('기타');
+
                       return (
-                        <label
-                          key={option}
-                          className={`flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none min-h-[48px] active:scale-[0.99] text-[15px] sm:text-base ${
-                            isSelected
-                              ? 'bg-emerald-50/90 border-emerald-600 text-emerald-950 font-semibold shadow-xs ring-1 ring-emerald-200'
-                              : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300'
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleCheckboxChange(q, option)}
-                            className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 shrink-0"
-                          />
-                          <span className="flex-1 leading-snug">{option}</span>
-                        </label>
+                        <div key={option} className="flex flex-col">
+                          <label
+                            className={`flex items-center gap-3.5 p-3.5 sm:p-4 rounded-xl border cursor-pointer transition-all select-none min-h-[50px] active:scale-[0.99] text-[16px] sm:text-[17px] ${
+                              isSelected
+                                ? 'bg-emerald-50/90 border-emerald-600 text-emerald-950 font-semibold shadow-xs ring-1 ring-emerald-200'
+                                : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleCheckboxChange(q, option)}
+                              className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 shrink-0"
+                            />
+                            <span className="flex-1 leading-snug">{option}</span>
+                          </label>
+
+                          {/* 기타 선택 시 구체적인 내용 입력창 */}
+                          {isEtcOption && isSelected && (
+                            <div className="mt-2 ml-2 pl-3 sm:pl-4 border-l-2 border-emerald-500 animate-fadeIn">
+                              <input
+                                type="text"
+                                value={formData[`${q.id}_기타`] || ''}
+                                onChange={(e) => handleInputChange(`${q.id}_기타`, e.target.value)}
+                                placeholder="기타 내용을 구체적으로 입력해 주세요"
+                                className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs"
+                                autoFocus
+                              />
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
@@ -309,11 +343,11 @@ function FacultySurveyContent() {
 
                 {/* 3. Select 드롭다운 */}
                 {q.type === 'select' && q.options && (
-                  <div className="relative">
+                  <div className="space-y-2">
                     <select
                       value={formData[q.id] || ''}
                       onChange={(e) => handleInputChange(q.id, e.target.value)}
-                      className="w-full min-h-[48px] p-3.5 sm:p-4 rounded-xl border border-slate-300 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all cursor-pointer shadow-xs"
+                      className="w-full min-h-[50px] p-3.5 sm:p-4 rounded-xl border border-slate-300 bg-white text-slate-900 text-[16px] sm:text-[17px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all cursor-pointer shadow-xs"
                     >
                       <option value="">선택해 주세요</option>
                       {q.options.map((option) => (
@@ -322,6 +356,20 @@ function FacultySurveyContent() {
                         </option>
                       ))}
                     </select>
+
+                    {/* 셀렉트에서 기타 선택 시 */}
+                    {(formData[q.id] === '기타' || formData[q.id]?.startsWith('기타')) && (
+                      <div className="mt-2 ml-2 pl-3 sm:pl-4 border-l-2 border-emerald-500 animate-fadeIn">
+                        <input
+                          type="text"
+                          value={formData[`${q.id}_기타`] || ''}
+                          onChange={(e) => handleInputChange(`${q.id}_기타`, e.target.value)}
+                          placeholder="기타 내용을 구체적으로 입력해 주세요"
+                          className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs"
+                          autoFocus
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -336,7 +384,7 @@ function FacultySurveyContent() {
                       onChange={(e) => handleInputChange(q.id, e.target.value)}
                       onBlur={q.id === '연락처' ? handlePhoneBlur : undefined}
                       placeholder={q.id === '연락처' ? '01012345678 (숫자만 입력)' : '입력해 주세요'}
-                      className={`w-full min-h-[48px] p-3.5 sm:p-4 rounded-xl border text-base focus:outline-none focus:ring-2 transition-all shadow-xs ${
+                      className={`w-full min-h-[50px] p-3.5 sm:p-4 rounded-xl border text-[16px] sm:text-[17px] focus:outline-none focus:ring-2 transition-all shadow-xs ${
                         phoneDuplicateError
                           ? 'border-red-500 focus:ring-red-200'
                           : 'border-slate-300 focus:ring-emerald-500/20 focus:border-emerald-600'
@@ -362,7 +410,7 @@ function FacultySurveyContent() {
                     value={formData[q.id] || ''}
                     onChange={(e) => handleInputChange(q.id, e.target.value)}
                     placeholder="자유롭게 의견을 작성해 주세요 (선택사항)"
-                    className="w-full p-3.5 sm:p-4 rounded-xl border border-slate-300 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all resize-y shadow-xs"
+                    className="w-full p-3.5 sm:p-4 rounded-xl border border-slate-300 text-[16px] sm:text-[17px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all resize-y shadow-xs"
                   />
                 )}
               </div>

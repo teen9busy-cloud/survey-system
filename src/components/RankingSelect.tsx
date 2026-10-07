@@ -48,7 +48,7 @@ export default function RankingSelect({ options, value, onChange }: RankingSelec
               <span className={`text-xs font-bold px-2.5 py-1 rounded-md shadow-2xs ${r.color}`}>
                 {r.badge}
               </span>
-              <span className="text-sm font-semibold text-slate-800">
+              <span className="text-sm sm:text-base font-semibold text-slate-900">
                 {r.label}
               </span>
             </div>
@@ -56,7 +56,7 @@ export default function RankingSelect({ options, value, onChange }: RankingSelec
               <select
                 value={selectedVal}
                 onChange={(e) => handleRankChange(r.key, e.target.value)}
-                className="w-full min-h-[46px] p-3 rounded-xl border border-slate-300 bg-white text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all cursor-pointer shadow-2xs"
+                className="w-full min-h-[48px] p-3 rounded-xl border border-slate-300 bg-white text-slate-900 text-[16px] sm:text-[17px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all cursor-pointer shadow-2xs"
               >
                 <option value="">항목을 선택해 주세요</option>
                 {options.map((opt) => {
