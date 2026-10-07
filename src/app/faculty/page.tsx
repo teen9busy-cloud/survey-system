@@ -31,14 +31,49 @@ function FacultySurveyContent() {
     }
   };
 
+  // 배타적 단독 선택지 판별 함수 (없음, 해당 없음 등)
+  const isExclusiveOption = (opt: string) => {
+    return opt === '없음' || opt === '해당 없음' || opt === '해당사항 없음';
+  };
+
   const handleCheckboxChange = (q: Question, option: string) => {
-    const currentList: string[] = Array.isArray(formData[q.id]) ? [...formData[q.id]] : [];
+    let currentList: string[] = Array.isArray(formData[q.id]) ? [...formData[q.id]] : [];
     const index = currentList.indexOf(option);
 
     if (index > -1) {
+      // 이미 선택된 항목을 다시 터치하면 해제
       currentList.splice(index, 1);
+      if (option === '기타' || option.startsWith('기타')) {
+        setFormData((prev) => {
+          const next = { ...prev, [q.id]: currentList };
+          if (next[`${q.id}_기타`]) {
+            delete next[`${q.id}_기타`];
+          }
+          return next;
+        });
+        setErrorMessage(null);
+        return;
+      }
     } else {
-      currentList.push(option);
+      if (isExclusiveOption(option)) {
+        currentList = [option];
+        setFormData((prev) => {
+          const next = { ...prev, [q.id]: currentList };
+          if (next[`${q.id}_기타`]) {
+            delete next[`${q.id}_기타`];
+          }
+          return next;
+        });
+        setErrorMessage(null);
+        return;
+      } else {
+        currentList = currentList.filter((item) => !isExclusiveOption(item));
+        if (q.maxSelect && currentList.length >= q.maxSelect) {
+          setErrorMessage(`최대 ${q.maxSelect}개까지만 선택할 수 있습니다.`);
+          return;
+        }
+        currentList.push(option);
+      }
     }
 
     setFormData((prev) => ({ ...prev, [q.id]: currentList }));

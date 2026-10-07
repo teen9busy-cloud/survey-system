@@ -34,19 +34,54 @@ function StudentSurveyContent() {
     }
   };
 
-  // 체크박스 다중 선택 핸들러
+  // 배타적 단독 선택지 판별 함수 (없음, 해당 없음 등)
+  const isExclusiveOption = (opt: string) => {
+    return opt === '없음' || opt === '해당 없음' || opt === '해당사항 없음';
+  };
+
+  // 체크박스 다중 선택 핸들러 (배타적 옵션 상호 배제 로직 적용)
   const handleCheckboxChange = (q: Question, option: string) => {
-    const currentList: string[] = Array.isArray(formData[q.id]) ? [...formData[q.id]] : [];
+    let currentList: string[] = Array.isArray(formData[q.id]) ? [...formData[q.id]] : [];
     const index = currentList.indexOf(option);
 
     if (index > -1) {
+      // 이미 선택된 항목을 다시 터치하면 해제
       currentList.splice(index, 1);
-    } else {
-      if (q.maxSelect && currentList.length >= q.maxSelect) {
-        setErrorMessage(`최대 ${q.maxSelect}개까지만 선택할 수 있습니다.`);
+      if (option === '기타' || option.startsWith('기타')) {
+        setFormData((prev) => {
+          const next = { ...prev, [q.id]: currentList };
+          if (next[`${q.id}_기타`]) {
+            delete next[`${q.id}_기타`];
+          }
+          return next;
+        });
+        setErrorMessage(null);
         return;
       }
-      currentList.push(option);
+    } else {
+      // 새로 선택하는 경우
+      if (isExclusiveOption(option)) {
+        // '없음' 선택 시: 기존의 모든 선택 항목(자격증 등)을 해제하고 '없음'만 단독 선택
+        currentList = [option];
+        setFormData((prev) => {
+          const next = { ...prev, [q.id]: currentList };
+          if (next[`${q.id}_기타`]) {
+            delete next[`${q.id}_기타`];
+          }
+          return next;
+        });
+        setErrorMessage(null);
+        return;
+      } else {
+        // 일반 항목 선택 시: 기존에 '없음'이 선택되어 있었다면 자동으로 해제
+        currentList = currentList.filter((item) => !isExclusiveOption(item));
+
+        if (q.maxSelect && currentList.length >= q.maxSelect) {
+          setErrorMessage(`최대 ${q.maxSelect}개까지만 선택할 수 있습니다.`);
+          return;
+        }
+        currentList.push(option);
+      }
     }
 
     setFormData((prev) => ({ ...prev, [q.id]: currentList }));
