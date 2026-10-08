@@ -186,6 +186,7 @@ export const FACULTY_SURVEY: SurveyPart[] = [
           "필수 이수 항목 폐지",
           "이수 항목별 배점 조정",
           "장학금액 확대",
+          "없음",
           "기타"
         ],
         dependsOn: { questionId: "문8_더자람제도_인지여부", value: "예" },
@@ -224,8 +225,8 @@ export const FACULTY_SURVEY: SurveyPart[] = [
         title: "문 10. 진로·취업 지도 특강에 가장 적합하다고 생각하는 운영 방법을 선택해 주십시오.",
         type: "radio",
         options: [
-          "대면 교육(학내 강의장)",
-          "대면 교육(학외 합숙 연수)",
+          "대면 교육(대학 내 강의장)",
+          "대면 교육(대학 밖 합숙 연수)",
           "비대면 교육(온라인)",
           "대면·비대면 교육 병행",
           "기타"
